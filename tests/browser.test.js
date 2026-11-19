@@ -41,7 +41,7 @@ async function go(p, hash) { await p.evaluate(function (h) { location.hash = h; 
 async function layout(p, name) {
   var r = await p.evaluate(function () {
     var over = document.documentElement.scrollWidth > window.innerWidth + 1;
-    var sel = 'button, a.btn, a.rowlink, a.hubcard, .bottomnav a, select, input[type=text], input[type=date], input[type=number], input[type=url], input[type=password], textarea, label.opt, label.tickline, .seg a';
+    var sel = 'button, a.btn, a.linkbtn, label.skipbox, a.rowlink, a.hubcard, .bottomnav a, select, input[type=text], input[type=date], input[type=number], input[type=url], input[type=password], textarea, label.opt, label.tickline, .seg a';
     var small = [];
     document.querySelectorAll(sel).forEach(function (el) {
       if (el.closest('.toast') || el.closest('[hidden]') || el.closest('.hidden')) return;
@@ -509,6 +509,156 @@ async function xssFlow(browser) {
   await p.context().close(); await t.context().close();
 }
 
+/* ---- regression tests for the defects found in the W2/W5 review (19 Nov) ---- */
+function api(action, data, token) { return post('/exec', { action: action, data: data || {}, token: token }); }
+async function signIn(p, id, pin) {
+  await p.goto(WEB + '/index.html'); await p.waitForSelector('#f_sid');
+  await p.selectOption('#f_sid', id); await p.fill('#f_pin', pin); await p.click('#lgf button[type=submit]');
+  await p.waitForFunction(function () { return !/login/.test(location.hash); }); await settle(p, 700);
+}
+async function queueEmpty(p) { await p.waitForFunction(function () { return (JSON.parse(localStorage.getItem('wi.queue') || '[]')).length === 0; }, null, { timeout: 15000 }); }
+async function reviewFixes(browser) {
+  log('Review fixes (Guest#2, Guest#3, teacher)');
+  await post('/__reset', { iso: '2026-11-21T09:00:00+07:00', release: 1 });
+  var p = await newPage(browser, {});
+  await signIn(p, 'g2', '2222');
+  // double tap on "save" makes one row and one award
+  await fill(p, '[name=word]', 'plim');
+  await fill(p, '[name=meaning]', 'A tiny win in a long school day.');
+  await fill(p, '[name=example1]', 'Getting a seat on the bus was a plim.');
+  await p.click('[data-act=next]'); await p.waitForSelector('.guess');
+  await p.dblclick('[data-act=savefirst]');
+  await p.waitForFunction(function () { return /#\/audition/.test(location.hash); }); await queueEmpty(p);
+  var xl = rowsOf(await dump('XPLog')).filter(function (r) { return r.studentId === 'g2' && r.ruleId === 'X01'; });
+  ok(xl.length === 1, 'double tap on save gives the first-step XP once (' + xl.length + ')');
+  // FUDGE letters are explained in plain words
+  await go(p, '#/audition/fudge');
+  ok(/sound like a normal word/.test(await p.textContent('[data-f=U]')), 'FUDGE: Unobtrusiveness is explained');
+  // choices: age question is not marked optional; target groups explained
+  await go(p, '#/debut/choices');
+  ok(/numbers are ages/.test(await p.textContent('[data-f=targetGroups]')), 'target groups: the numbers are explained');
+  await p.check('input[name=platforms][value=pf_tiktok]');
+  ok(!/optional/.test(await p.textContent('[data-f=is16] legend')), 'age question is not marked optional');
+  ok(/influencer/.test(await p.$eval('input[name=ideas][value=id_influencer]', function (e) { return e.closest('label').textContent; })), '"ask T.Chris first" says what it is for');
+  // tally: no character counter under a number
+  await go(p, '#/log/tally/new');
+  ok(!(await p.$('[data-f=count] .count')), 'tally count has no character counter');
+  // Lab Book: heading and a default kind
+  await go(p, '#/log/journal/new');
+  ok(/New Lab Book entry/.test(await p.textContent('h1')), 'Lab Book heading keeps its capitals');
+  ok(await p.inputValue('[name=kind]') === 'reflection', 'new Lab Book entry starts as a reflection');
+  await fill(p, '[name=text]', LONG);
+  await p.click('[data-act=save]');
+  await p.waitForFunction(function () { return /#\/log\?tab=journal/.test(location.hash); });
+  ok(true, 'Lab Book entry saves without choosing a kind first');
+  // sighting: owned / earned is explained and fits the screen
+  await go(p, '#/log/sighting/new');
+  await p.selectOption('[name=relation]', 'classmate');
+  await p.check('input[name=prompted][value=unasked]');
+  ok(/earned evidence: someone used the word without being asked/.test(await p.textContent('#owned')), 'earned is explained');
+  await layout(p, 'sighting with the earned note');
+  // plan: seven stages listed in order, no out-of-order stage headings
+  await go(p, '#/plan');
+  var stages = await p.$$eval('.stagelist li', function (a) { return a.map(function (x) { return x.textContent.trim().replace(/\s+/g, ' '); }); });
+  ok(stages.length === 7 && /^1 Audition/.test(stages[0]) && /^7 Encore/.test(stages[6]), 'plan lists the seven stages in order: ' + stages.join(' | '));
+  ok((await p.$$('.timeline .stagemark')).length === 0 && (await p.$$('.timeline .stagetag')).length >= 16, 'each milestone names its stage');
+  await layout(p, 'plan with stage list');
+  await queueEmpty(p);
+  // Sunday review: the review item itself is not offered for "carry / could not do"
+  await clock('2026-11-22T10:00:00+07:00');
+  await p.reload(); await settle(p, 1500);
+  ok(/#\/review/.test(p.url()), 'Sunday review opens');
+  var its = await p.$$eval('[data-item]', function (a) { return a.map(function (x) { return x.textContent; }); });
+  ok(its.length > 0 && !its.some(function (x) { return /weekly review/i.test(x); }), 'the review does not ask her to carry the review itself');
+  await p.click('[data-act=s2]');
+  await fill(p, '[name=wentWell]', 'I saved my word and wrote one honest entry.');
+  await fill(p, '[name=toChange]', 'I will finish my plan table on Monday.');
+  await p.click('[data-act=s3]'); await settle(p, 300);
+  await layout(p, 'review step 3 (skip boxes)');
+  await p.click('[data-act=submit]');
+  await p.waitForFunction(function () { return /#\/week/.test(location.hash); }); await queueEmpty(p);
+  var rv = rowsOf(await dump('Reviews')).filter(function (r) { return r.studentId === 'g2'; });
+  ok(rv.length === 1, 'review saved on the server');
+  var done = await p.evaluate(function () { return WIApp.data().checklist.filter(function (r) { return /weekly review/i.test(r.title) && r.weekId === 'W01'; })[0].status; });
+  ok(done === 'done', 'the review item ticks itself (' + done + ')');
+  // report helper: text typed while a save is on its way survives a reload
+  await go(p, '#/report/baseline'); await settle(p, 500);
+  ok(!(await p.$('[data-sec=wave1] [data-go]')), 'no "go and fill it in" button for a wave that is not published');
+  await post('/__delay', { ms: 600 });
+  await p.fill('[data-text=profile]', LONG);
+  await p.fill('[data-text=fudge]', 'Typed while the first save was still on its way.');
+  await settle(p, 1500);
+  await post('/__delay', { ms: 0 });
+  await p.reload(); await settle(p, 1500);
+  ok(/still on its way/.test(await p.inputValue('[data-text=fudge]')), 'report text typed during a save survives a reload');
+  ok((await p.inputValue('[data-text=profile]')) === LONG, 'the first section is still there too');
+  await p.click('[data-act=save]'); await settle(p, 600); await queueEmpty(p);
+  // session ended by the server (PIN reset): she is sent to sign in, unsent work is kept and sent after sign-in
+  var tk = (await api('t.login', { pin: '123456' })).data.token;
+  var pr = await api('t.pin', { studentId: 'g2', newPin: '5656' }, tk);
+  ok(pr.ok, 'teacher reset the PIN');
+  await go(p, '#/log/tally/new');
+  await p.selectOption('[name=tallyType]', 'said'); await fill(p, '[name=count]', '4'); await fill(p, '[name=note]', 'kept-after-pin-reset');
+  await p.click('[data-act=save]');
+  await p.waitForFunction(function () { return /#\/login/.test(location.hash); }, null, { timeout: 8000 });
+  ok(true, 'a session ended by the server sends her to the sign-in screen');
+  var kept = await p.evaluate(function () { return { q: JSON.parse(localStorage.getItem('wi.queue') || '[]').length, s: !!localStorage.getItem('wi.session') }; });
+  ok(kept.q >= 1 && !kept.s, 'the unsent entry stays on the phone, the old session is gone');
+  await p.waitForSelector('#f_sid');
+  await p.selectOption('#f_sid', 'g2'); await p.fill('#f_pin', '5656'); await p.click('#lgf button[type=submit]');
+  await p.waitForFunction(function () { return !/login/.test(location.hash); }); await queueEmpty(p);
+  var tl = rowsOf(await dump('Tallies')).filter(function (r) { return r.note === 'kept-after-pin-reset'; });
+  ok(tl.length === 1 && tl[0].studentId === 'g2', 'the kept entry reaches the Sheet once after she signs in again');
+  // ... and never under another student's name
+  await api('t.pin', { studentId: 'g2', newPin: '5757' }, tk);
+  await go(p, '#/log/tally/new');
+  await p.selectOption('[name=tallyType]', 'said'); await fill(p, '[name=count]', '5'); await fill(p, '[name=note]', 'must-not-move');
+  await p.click('[data-act=save]');
+  await p.waitForFunction(function () { return /#\/login/.test(location.hash); }, null, { timeout: 8000 });
+  await p.waitForSelector('#f_sid');
+  await p.selectOption('#f_sid', 'g3'); await p.fill('#f_pin', '3333'); await p.click('#lgf button[type=submit]');
+  await p.waitForSelector('#ff'); await settle(p, 800);
+  var moved = rowsOf(await dump('Tallies')).filter(function (r) { return r.note === 'must-not-move'; });
+  var q3 = await p.evaluate(function () { return JSON.parse(localStorage.getItem('wi.queue') || '[]').length; });
+  ok(moved.length === 0 && q3 === 0, 'another student signing in does not send the first student’s unsent work');
+  ok(!p.__errors.length, 'no page or console errors (review fixes, student): ' + p.__errors.join(' | '));
+  await p.context().close();
+
+  // teacher: wave grid
+  var t = await newPage(browser, { viewport: { width: 1366, height: 768 } });
+  await t.goto(WEB + '/teacher.html'); await t.waitForSelector('#pin');
+  await t.fill('#pin', '123456'); await t.click('#lf button[type=submit]'); await t.waitForSelector('table.t');
+  await go(t, '#/waves/W1'); await t.waitForSelector('#wdate');
+  async function row(key, n, r, ns, c) {
+    await t.fill('input[data-k=n][data-t="' + key + '"]', n); await t.fill('input[data-k=recognised][data-t="' + key + '"]', r); await t.fill('input[data-k=notSure][data-t="' + key + '"]', ns);
+    if (c != null) await t.fill('input[data-k=comprehended][data-t="' + key + '"]', c);
+  }
+  await t.click('[data-act=save]');
+  ok(/choose the date/i.test(await t.textContent('[data-f=wdate] .err')), 'wave: the date is asked for');
+  await t.fill('#wdate', '2026-11-23');
+  ok((await t.textContent('[data-f=wdate] .err')) === '', 'wave: the date error clears when the date is filled in');
+  await row('s01', '60', '70', '0', '5');
+  await t.click('[data-act=save]');
+  ok(/between 0 and n|more than n/.test(await t.textContent('[data-err=s01]')), 'wave: recognised cannot be more than n');
+  await t.fill('input[data-k=recognised][data-t="s01"]', '12');
+  ok((await t.textContent('[data-err=s01]')) === '', 'wave: the row error clears when the row is corrected');
+  await t.click('[data-act=save]'); await settle(t, 1000);
+  var wv = rowsOf(await dump('Waves'));
+  ok(wv.length === 1 && wv[0].termKey === 's01', 'wave: a draft with some rows empty can be saved (' + wv.length + ' row)');
+  await t.waitForSelector('#wdate');
+  await t.click('[data-act=publish]'); await settle(t, 300);
+  ok(/needed before you publish/.test(await t.textContent('[data-err=foil1]')) && !(await t.$('.sheet')), 'wave: cannot publish without the controls and foils');
+  await row('ctrl1', '60', '48', '5', '40'); await row('ctrl2', '60', '45', '5', '38'); await row('foil1', '60', '6', '3', null); await row('foil2', '60', '6', '3', null);
+  await t.click('[data-act=publish]'); await t.waitForSelector('.sheet');
+  ok(/7 student rows are empty/.test(await t.textContent('.sheet')), 'wave: the publish box says how many student rows are empty');
+  await t.click('.sheet [data-act=y]'); await settle(t, 1200);
+  ok(/Published/.test(await t.textContent('main')), 'wave: published with empty student rows');
+  wv = rowsOf(await dump('Waves'));
+  ok(wv.length === 5 && wv.every(function (r) { return String(r.published).toUpperCase() === 'TRUE'; }), 'wave: five rows published (' + wv.length + ')');
+  ok(!t.__errors.length, 'no page or console errors (review fixes, teacher): ' + t.__errors.join(' | '));
+  await t.context().close();
+}
+
 async function lookPass(browser) {
   log('Screens at 375 x 667 and 1366 x 768, light and dark');
   var views = [{ w: 375, h: 667 }, { w: 1366, h: 768 }];
@@ -553,6 +703,7 @@ async function lookPass(browser) {
     await studentPart2(browser, p);
     await p.context().close();
     await lookPass(browser);
+    await reviewFixes(browser);
   } catch (e) { fails.push('crash: ' + (e && e.stack || e)); console.log(e); }
   await browser.close();
   console.log('\n' + passes + ' passed, ' + fails.length + ' failed. Screenshots: ' + SHOTS);

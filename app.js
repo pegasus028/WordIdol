@@ -143,7 +143,10 @@
     api.bootstrap().then(function (r) { if (r.ok) { D = api.data(); rerender(); } });
   });
   api.on('auth', function () {
-    if (cur.path !== 'login') { toast('Please sign in again.', 'err'); location.hash = '#/login'; }
+    // the server no longer accepts this session (PIN reset or expiry): forget the token, keep unsent work
+    var had = !!api.session();
+    api.dropSession();
+    if (cur.path !== 'login') { if (had) toast('Please sign in again. Your unsent work is safe on this phone.', 'err', 6000); closeSheets(); location.hash = '#/login'; }
   });
   api.on('queue', function () { renderChrome(); });
   api.on('synced', function () { D = api.data() || D; renderChrome(); refreshSaveStates(); });
@@ -165,7 +168,7 @@
     scrim.addEventListener('click', function (ev) {
       if (ev.target === scrim || ev.target.closest('[data-close]')) { api_.close(); return; }
       var a = ev.target.closest('[data-act]');
-      if (a && onAct) onAct(a.getAttribute('data-act'), a, api_, ev);
+      if (a && onAct && !doubleTap(a)) onAct(a.getAttribute('data-act'), a, api_, ev);
     });
     sheetStack.push(api_);
     var f = scrim.querySelector('input,select,textarea,button:not([data-close])');
@@ -287,6 +290,7 @@
       var w = wc(s);
       return { t: words(w) + (r.max && r.words ? ' of ' + r.max : '') + (def.wordGoal ? ' (aim for ' + def.wordGoal + ')' : ''), over: r.words && r.max && w > r.max };
     }
+    if (def.t === 'number' || def.t === 'date' || r.type === 'int') return null;
     if (r.max) return { t: s.trim().length + ' / ' + r.max, over: s.trim().length > r.max };
     return null;
   }
@@ -298,7 +302,7 @@
     var r = ruleOf(def);
     var hidden = def.show && !def.show(vals) ? ' hidden' : '';
     var h = '<div class="field ' + (def.cls || '') + hidden + '" data-f="' + esc(def.n) + '">';
-    var lbl = esc(def.l) + (r.req || def.t === 'tick' ? '' : ' <span class="muted small">(optional)</span>');
+    var lbl = esc(def.l) + (r.req || def.t === 'tick' || def.noOpt ? '' : ' <span class="muted small">(optional)</span>');
     var hint = def.h ? '<p class="hint" id="' + id + '_h">' + def.h + '</p>' : '';
     var desc = def.h ? ' aria-describedby="' + id + '_h"' : '';
     if (def.t === 'radio' || def.t === 'checks') {
@@ -502,7 +506,7 @@
   function renderChrome() {
     var pill = document.getElementById('syncpill');
     if (!pill) return;
-    var q = api.queue().length;
+    var q = api.queue().filter(function (o) { return !(o.action === 'checklist.tick' && o.data && o.data.auto); }).length || (api.queue().length ? 1 : 0);
     var off = root.navigator && root.navigator.onLine === false;
     if (q) { pill.textContent = q + ' waiting to send'; pill.className = 'syncpill wait'; pill.hidden = false; }
     else if (off) { pill.textContent = 'Offline'; pill.className = 'syncpill wait'; pill.hidden = false; }
@@ -515,14 +519,15 @@
     return NAV.map(function (n) { return '<a href="#/' + n[0] + '" data-nav="' + n[0] + '">' + ic(n[2]) + '<span>' + n[1] + '</span></a>'; }).join('');
   }
   var NAV_OF = { home: 'home', week: 'week', log: 'log', plan: 'plan', more: 'more', audition: 'more', debut: 'more', files: 'more', report: 'more', charts: 'more', audits: 'more', summit: 'more', encore: 'more', guide: 'more', board: 'more', problem: 'more', rules: 'more', badges: 'more' };
-  function setChrome(first) {
+  function setChrome(first, depth) {
     var noNav = { login: 1, first: 1, review: 1 }[first];
     document.body.classList.toggle('no-nav', !!noNav);
     document.body.classList.toggle('has-nav', !noNav);
     var tab = NAV_OF[first] || '';
     qsa('.bottomnav a').forEach(function (a) { if (a.getAttribute('data-nav') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     var fab = document.getElementById('fab');
-    if (fab) fab.hidden = !(first === 'home' || first === 'week' || first === 'log');
+    // the "+" belongs to the Home, Week and Log lists, not to the forms inside them (it would cover Save)
+    if (fab) fab.hidden = !((first === 'home' || first === 'week' || first === 'log') && !(first === 'log' && depth > 2));
   }
   function quickAdd() {
     var off = root.navigator && root.navigator.onLine === false;
@@ -574,7 +579,7 @@
     closeSheets();
     if (cur.cleanup) { try { cur.cleanup(); } catch (e) { /* ignore */ } }
     cur = { acts: {}, path: h.parts[0], full: h.path, q: h.q, cleanup: null, isForm: false };
-    setChrome(h.parts[0]);
+    setChrome(h.parts[0], h.parts.length);
     var fn = SCREENS[h.parts[0]];
     if (h.parts[0] !== 'login' && !D) { view.innerHTML = loadingHTML(); return; }
     if (!fn) { view.innerHTML = '<div class="empty"><strong>This page does not exist.</strong><a class="btn" href="#/home">Go home</a></div>'; return; }
@@ -590,9 +595,25 @@
   function loadingHTML() { return '<div class="empty" aria-busy="true"><strong>Opening WordIdol…</strong></div>'; }
   function render(html) { view.innerHTML = html; }
   function acts(map) { cur.acts = map; }
+  /* one action per tap: a second tap on the same control within half a second is ignored (double taps) */
+  var lastTap = { el: null, act: '', t: 0 };
+  function doubleTap(a) {
+    var key = a.getAttribute('data-row') || a.getAttribute('data-id') || '';
+    var t = Date.now(), act = key ? a.getAttribute('data-act') + '|' + key : '';
+    var dbl = (lastTap.el === a || (act && lastTap.act === act)) && t - lastTap.t < 500;
+    lastTap = { el: a, act: act, t: t };
+    return dbl;
+  }
+  /* typing or choosing something between two taps means the second tap is a new action */
+  document.addEventListener('input', function () { lastTap.t = 0; }, true);
+  document.addEventListener('change', function () { lastTap.t = 0; }, true);
   document.addEventListener('click', function (ev) {
     var a = ev.target.closest('[data-act]');
-    if (a && view.contains(a) && cur.acts[a.getAttribute('data-act')]) { ev.preventDefault(); cur.acts[a.getAttribute('data-act')](a, ev); }
+    if (a && view.contains(a) && cur.acts[a.getAttribute('data-act')]) {
+      ev.preventDefault();
+      if (doubleTap(a)) return;
+      cur.acts[a.getAttribute('data-act')](a, ev);
+    }
   });
 
   /* "Opens on <date>" card for later releases */
@@ -654,7 +675,7 @@
           }
           LS.set('wi.lastStudent', s);
           box.innerHTML = '<p class="muted">Opening your project…</p>';
-          api.bootstrap().then(function (b) {
+          api.flush().then(function () { return api.bootstrap(); }).then(function (b) {
             if (!b.ok) { box.innerHTML = '<div class="note bad">' + esc((b.error && b.error.message) || WIApi.NET_MSG) + '</div><button class="btn" data-act="retry">Try again</button>'; acts({ retry: function () { boot(); } }); return; }
             D = api.data(); lastXp = null; noteState(D.state);
             go('#/home');
@@ -925,7 +946,7 @@
     if (!past && rv && nextW) {
       var pv = try_(function () { return E().previewWeek(D, wk, now(), { nextPrefs: rv.nextPrefs || {}, decisions: rv.decisions || {} }); }, []);
       if (pv && pv.length) {
-        h += '<section class="section"><h2>Next week (starts Monday)</h2><div class="panel flat">' + pv.map(function (r) { return '<div class="rowlink" style="min-height:0"><span class="grow"><span class="t">' + esc(r.title) + '</span><span class="s">' + esc(r.kind === 'required' ? 'Must do' : (r.kind === 'own' ? 'My own' : r.kind)) + (r.dueDate ? ', due ' + esc(fmt(r.dueDate)) : '') + '</span></span></div>'; }).join('') + '</div></section>';
+        h += '<section class="section"><h2>Next week (starts Monday)</h2><div class="panel flat">' + pv.map(function (r) { return '<div class="rowlink" style="min-height:0"><span class="grow"><span class="t">' + esc(r.title) + '</span><span class="s">' + esc({ required: 'Must do', own: 'My own', recommended: 'Recommended', optional: 'Optional' }[r.kind] || r.kind) + (r.dueDate ? ', due ' + esc(fmt(r.dueDate)) : '') + '</span></span></div>'; }).join('') + '</div></section>';
       }
     }
     void due;
@@ -962,6 +983,9 @@
     var rows = (D.checklist || []).filter(function (r) { return r.itemId === itemId; });
     if (rows.some(function (r) { return r.status === 'done'; })) return 'done';
     if (rows.some(function (r) { return r.status === 'cannot'; })) return 'cannot';
+    // an item of a later week whose work she has already done (its check passes) counts as done
+    var def = try_(function () { return E().itemDef(itemId, D); }, null);
+    if (def && def.check && !/^week\./.test(def.check) && check(def.check)) return 'done';
     return rows.length ? 'open' : 'later';
   }
   function reqsForMilestone(m) {
@@ -982,22 +1006,20 @@
     var curS = stageId();
     var h = '<div class="screen-head"><h1>My promotion plan</h1></div><p class="lead">Seven stages, sixteen milestones, from launch to the research article.</p>';
     h += stageHTML({ mini: true });
-    h += '<ol class="timeline">';
-    var phase = 0, shownStage = {};
+    h += '<ol class="stagelist" aria-label="The seven stages">' + stages.map(function (s, i) { return '<li class="' + (s.id === curS ? 'now' : '') + '"><b>' + (i + 1) + '</b> ' + esc(s.name) + (s.id === curS ? ' <span class="chip pop">you are here</span>' : '') + '</li>'; }).join('') + '</ol>';
+    h += '<h2>Milestones</h2><ol class="timeline">';
+    var phase = 0;
     ms.forEach(function (m) {
       var ph = m.date >= '2026-12-18' ? 2 : 1;
       if (ph !== phase) { phase = ph; h += '<li class="phase" aria-hidden="false">' + (ph === 1 ? 'Cycle 1: 16 Nov to 20 Dec 2026' : 'Cycle 2: from 18 Dec 2026') + '</li>'; }
-      if (m.stageId && !shownStage[m.stageId]) {
-        shownStage[m.stageId] = 1;
-        var s = stages.filter(function (x) { return x.id === m.stageId; })[0];
-        if (s) h += '<li class="stagemark">' + esc(s.name) + (s.id === curS ? ' (you are here)' : '') + '</li>';
-      }
+      var msStage = stages.filter(function (x) { return x.id === m.stageId; })[0];
       var status = try_(function () { return E().milestoneStatus(m, now()); }, 'later');
       var dl = try_(function () { return E().daysLeft(m.date, now()); }, null);
       var big = m.deliverable || m.kind === 'deliverable';
       h += '<li class="' + status + (big ? ' big' : '') + (m.kind === 'light' ? ' light' : '') + '"><span class="dot"></span><button class="rowlink ms' + (big ? ' deliverable' : '') + '" data-act="ms" data-id="' + esc(m.id) + '" style="padding:.6rem .5rem"><span class="grow"><span class="when">' + esc(fmt(m.date)) + (m.endDate ? ' – ' + esc(fmt(m.endDate)) : '') +
         (status === 'done' ? ', done' : (dl != null && dl >= 0 ? (dl === 0 ? ', today' : ', ' + dl + (dl === 1 ? ' day' : ' days') + ' left') : '')) + '</span><span class="t ms-title">' + esc(m.title) + '</span>' +
-        (m.points ? '<span class="s">' + esc(m.points) + ' points' + (m.pointsNote ? ' (' + esc(m.pointsNote) + ')' : '') + '</span>' : '') + '</span>' + ic('right', 'chev') + '</button></li>';
+        (m.points ? '<span class="s">' + esc(m.points) + ' points' + (m.pointsNote ? ' (' + esc(m.pointsNote) + ')' : '') + '</span>' : '') +
+        (msStage ? '<span class="s stagetag">Stage ' + (stages.indexOf(msStage) + 1) + ': ' + esc(msStage.name) + '</span>' : '') + '</span>' + ic('right', 'chev') + '</button></li>';
     });
     h += '</ol>';
     var p = plan1();
@@ -1164,7 +1186,7 @@
     var fileIds = (zb.fileIds || []).slice();
     var pg = wordFormPage({
       title: 'Zero-baseline record', defs: defs, vals: vals, dk: dk,
-      intro: '<p class="lead">Search for your exact spelling and its variants in each place. Record what you find before you launch your word.</p><div id="zbwarn"></div>',
+      intro: '<p class="lead">Search each place for your word, with your exact spelling and other ways to spell it. Record what you find before you launch your word. This shows that your word was new when you started.</p><div id="zbwarn"></div>',
       extra: '<h2>Screenshots</h2><p class="hint">Up to 6. Asked for, not required. Suggested caption: ' + esc((root.WI_CHOICES && root.WI_CHOICES.zbCaption) || 'TERM_platform_YYYYMMDD') + '</p><div id="zbfiles"></div>',
       onChange: function (v) { warn(v); },
       onSave: function (v, el) {
@@ -1198,6 +1220,13 @@
     acts({ send: function () { save('word.submit', {}); toast('Sent. T.Chris will look at it soon.'); go('#/audition'); } });
   };
 
+  var FUDGE_HELP = {
+    F: 'Will people have many chances to use it? 0 = almost never, 2 = every day.',
+    U: 'Does it sound like a normal word, so people do not stop and stare? 0 = it sounds strange, 2 = it fits in easily.',
+    D: 'Can many kinds of people use it, in many situations? 0 = only my group, 2 = almost anyone.',
+    G: 'Can it make new forms or meanings, for example with -y, -ed or -er? 0 = no, 2 = easily.',
+    E: 'Will the thing it names still matter next year? 0 = it will be gone soon, 2 = it will last.'
+  };
   AUD.fudge = function () {
     var w = D.word || {};
     var pred = (w.fudge && w.fudge.pred) || {};
@@ -1208,7 +1237,7 @@
     vals = Object.assign(vals, getDraft(dk) || {});
     var defs = [];
     letters.forEach(function (L) {
-      defs.push({ n: L.id, t: 'slider', form: 'fudge', l: L.id + ': ' + L.label, R: true });
+      defs.push({ n: L.id, t: 'slider', form: 'fudge', l: L.id + ': ' + L.label, h: FUDGE_HELP[L.id] || '', R: true });
       defs.push({ n: 'why_' + L.id, t: 'text', form: 'fudge', l: 'Why ' + L.id + '?', R: true, min: 10, max: 200 });
     });
     function total(v) { var t = 0, all = true; letters.forEach(function (L) { if (v[L.id] === '' || v[L.id] == null) all = false; else t += Number(v[L.id]); }); return { t: t, all: all }; }
@@ -1219,7 +1248,7 @@
     }
     wordFormPage({
       title: 'FUDGE prediction', defs: defs, vals: vals, dk: dk,
-      intro: '<p class="lead">Score each letter 0, 1 or 2 and give one reason. 7 or more: likely. 5–6: fringe. 4 or less: doomed.</p><div id="ftotal" class="panel gold" aria-live="polite"></div>',
+      intro: '<p class="lead">FUDGE is five tests for a new word. Score each letter 0 (weak), 1 (in the middle) or 2 (strong) and give one reason. Total 7 or more: likely to last. 5–6: fringe (it may stay in a small group). 4 or less: doomed (it will probably disappear).</p><div id="ftotal" class="panel gold" aria-live="polite"></div>',
       onChange: function (v) { showTotal(v); },
       onSave: function (v, el) {
         var p = { reasons: {}, at: now() };
@@ -1327,22 +1356,22 @@
         var sub = o.helper || '';
         if (o.askFirst) {
           var rq = askReq(o.id);
-          sub = sel ? 'T.Chris said yes.' : (rq && rq.status === 'pending' ? 'Waiting for T.Chris.' : (rq && rq.status === 'declined' ? 'T.Chris said no. ' + esc(rq.teacherComment || '') : 'Locked until T.Chris says yes.'));
+          sub = 'For any idea that needs help from someone you do not know, such as an influencer. ' + (sel ? 'T.Chris said yes.' : (rq && rq.status === 'pending' ? 'Waiting for T.Chris.' : (rq && rq.status === 'declined' ? 'T.Chris said no. ' + esc(rq.teacherComment || '') : 'Locked until T.Chris says yes.')));
         }
         return { id: o.id, label: o.shownAs || o.label, sub: sub, disabled: !sel };
       });
     };
     var anyOnline = function (v) { return (v.platforms || []).some(function (x) { return (opt('platforms', x) || {}).online; }); };
     var defs = [
-      { n: 'targetGroups', t: 'checks', form: 'choices', l: 'Target groups', two: true, opts: CH('targetGroups') },
+      { n: 'targetGroups', t: 'checks', form: 'choices', l: 'Target groups', h: 'Who do you want to reach with your word? The numbers are ages. Choose one or more.', two: true, opts: CH('targetGroups') },
       { n: 'ideas', t: 'checks', form: 'choices', l: 'Promotion ideas', h: 'Choose at least one in-person idea.', opts: ideaOpts,
         check: function (v) { var ok = v.some(function (x) { var m = (opt('ideas', x) || {}).mode; return m === 'inperson' || m === 'either'; }); return ok ? '' : 'Choose at least one idea you can do in person.'; },
         after: function () { var rq = askReq('id_influencer'); return ideaSelectable('id_influencer') || (rq && rq.status === 'pending') ? '' : '<button class="btn small" type="button" data-act="ask">Ask T.Chris first</button>'; } },
       { n: 'platforms', t: 'checks', form: 'choices', l: 'Platforms', two: true, opts: CH('platforms'),
         check: function (v) { return v.indexOf('pf_inperson') >= 0 && v.length > 1 ? '"In person only" cannot go with other platforms.' : ''; } },
-      { n: 'platformOther', t: 'text', form: 'choices', l: 'Which other platform?', max: 30, show: function (v) { return (v.platforms || []).indexOf('pf_other') >= 0; }, R: false,
+      { n: 'platformOther', t: 'text', form: 'choices', l: 'Which other platform?', max: 30, noOpt: true, show: function (v) { return (v.platforms || []).indexOf('pf_other') >= 0; }, R: false,
         check: function (x, v) { return (v.platforms || []).indexOf('pf_other') >= 0 && !String(x || '').trim() ? 'Please fill this in.' : ''; } },
-      { n: 'is16', t: 'radio', l: 'How old are you?', h: 'This stays on this phone. It is never sent to WordIdol. It helps us show the right safety advice.', opts: [{ id: 'false', label: 'I am 15 or under' }, { id: 'true', label: 'I am 16 or over' }], show: anyOnline, R: false,
+      { n: 'is16', t: 'radio', noOpt: true, l: 'How old are you?', h: 'This stays on this phone. It is never sent to WordIdol. It helps us show the right safety advice.', opts: [{ id: 'false', label: 'I am 15 or under' }, { id: 'true', label: 'I am 16 or over' }], show: anyOnline, R: false,
         check: function (x, v) { return anyOnline(v) && x === '' ? 'Please choose one.' : ''; } },
       { n: 'route', t: 'radio', form: 'choices', l: 'My route', opts: CH('routes') },
       { n: 'timeBudget', t: 'radio', form: 'choices', l: 'My time each week', opts: CH('timeBudgets') },
@@ -1598,8 +1627,8 @@
         { n: 'derivedForm', t: 'text', form: 'sighting', l: 'Did they make a new form of it?', h: 'For example -y, -ed, -er' },
         { n: 'level', t: 'radio', form: 'sighting', l: 'Evidence Level', num: true, h: '<button type="button" class="linkbtn" data-act="levels">What do the levels mean?</button>',
           opts: lv.map(function (L) { var ok = allowed.indexOf(L.level) >= 0; return { id: L.level, label: L.level + ' ' + L.name, sub: ok ? esc(L.definition) : 'Comes from the survey', disabled: !ok }; }) },
-        { n: 'html', t: 'html', html: function () { return '<p id="owned" class="chip" aria-live="polite"></p>'; } },
-        { n: 'link', t: 'url', form: 'sighting', l: 'Link', h: 'https only.' },
+        { n: 'html', t: 'html', html: function () { return '<p id="owned" class="note hidden" aria-live="polite"></p>'; } },
+        { n: 'link', t: 'url', form: 'sighting', l: 'Link', h: 'If there is a public link, paste it here. It must start with https://' },
         { n: 'verifiable', t: 'radio', form: 'sighting', l: 'Could T.Chris check this?', bool: true, opts: CH('verifiable').map(function (o) { return { id: String(o.id), label: o.label }; }) }
       ];
     }
@@ -1626,6 +1655,7 @@
     var vals = Object.assign({ date: today() }, rec || {}, draft);
     vals.__id = recId;
     if (isNew && q.kind && !draft.kind) vals.kind = q.kind;
+    if (isNew && type === 'journal' && !vals.kind) vals.kind = 'reflection';
     if (isNew && q.plan && !draft.planActionId) {
       var pa = live(D.planActions).filter(function (x) { return x.id === q.plan; })[0];
       if (pa) Object.assign(vals, { planActionId: pa.id, channelId: pa.where, ideaId: pa.ideaId, what: pa.what });
@@ -1636,7 +1666,7 @@
     var fileIds = (vals.fileIds || []).slice();
     var title = { action: 'Action', journal: 'Lab Book entry', sighting: 'Sighting', tally: 'Tally' }[type];
     var canDel = !isNew && !(type === 'sighting' && rec.auditStatus && rec.auditStatus !== 'none');
-    var h = backLink('#/log?tab=' + type, 'The Log') + '<div class="screen-head"><h1>' + (isNew ? 'New ' + title.toLowerCase() : title) + '</h1></div>';
+    var h = backLink('#/log?tab=' + type, 'The Log') + '<div class="screen-head"><h1>' + (isNew ? 'New ' + (type === 'journal' ? title : title.toLowerCase()) : title) + '</h1></div>';
     if (type === 'sighting' && rec && rec.auditStatus && rec.auditStatus !== 'none') h += '<div class="note">An auditor looked at this sighting: <b>' + esc({ assigned: 'waiting for the auditor', agreed: 'agreed with your level', disputed: 'would give a different level', unverifiable: 'could not check it' }[rec.auditStatus] || rec.auditStatus) + '</b>.' + (rec.spotStatus && rec.spotStatus !== 'none' && rec.spotStatus !== 'queued' ? ' Checked by T.Chris: Level ' + esc(rec.finalLevel) + '.' : '') + '</div>';
     if (type === 'journal' && q.stuck) {
       var sp = (G().stuck || []).filter(function (s) { return s.id === q.stuck; })[0];
@@ -1659,10 +1689,10 @@
     }
     function owned(v) {
       var o = qs('#owned'); if (!o) return;
-      if (!v.relation && !v.prompted) { o.textContent = ''; o.className = 'chip hidden'; return; }
+      if (!v.relation && !v.prompted) { o.textContent = ''; o.className = 'note hidden'; return; }
       var isOwned = try_(function () { return E().owned(v); }, v.relation === 'me' || v.prompted === 'asked');
-      o.className = 'chip ' + (isOwned ? '' : 'ok');
-      o.textContent = isOwned ? 'This sighting is owned evidence' : 'This sighting is earned evidence';
+      o.className = 'note' + (isOwned ? '' : ' ok');
+      o.textContent = isOwned ? 'This sighting is owned evidence: you used the word, or you asked for it.' : 'This sighting is earned evidence: someone used the word without being asked.';
     }
     function lock(v) {
       var box = qs('#lockmsg'); if (!box) return false;
@@ -1863,7 +1893,8 @@
     var rest = due.filter(function (w) { return w !== wk; });
     var dk = draftKey('review', wk);
     var st = getDraft(dk) || { step: 1, decisions: {}, reasons: {}, wentWell: '', toChange: '', skip: [], own: [], moved: {} };
-    var rows = try_(function () { return E().weekRows(D, wk); }, []).filter(function (r) { return r.status !== 'carried' && r.status !== 'expired'; });
+    // the review item ticks itself when she submits, so it is not something to carry or drop
+    var rows = try_(function () { return E().weekRows(D, wk); }, []).filter(function (r) { return r.status !== 'carried' && r.status !== 'expired' && (itemOf(r) || {}).check !== 'week.review'; });
     var rng = try_(function () { return E().weekRange(wk); }, { label: wk });
     function persist() { putDraft(dk, st); }
     function stepsBar() { return '<div class="steps" aria-label="Step ' + st.step + ' of 3"><i class="on"></i><i class="' + (st.step >= 2 ? 'on' : '') + '"></i><i class="' + (st.step >= 3 ? 'on' : '') + '"></i></div>'; }
@@ -1884,14 +1915,14 @@
             '<label class="opt"><input type="radio" name="' + nm + '" value="carry"' + (dec === 'carry' ? ' checked' : '') + '><span>Carry it</span></label>' +
             '<label class="opt"><input type="radio" name="' + nm + '" value="cannot"' + (dec === 'cannot' ? ' checked' : '') + '><span>Could not do</span></label>' +
             (canDrop ? '<label class="opt"><input type="radio" name="' + nm + '" value="dropped"' + (dec === 'dropped' ? ' checked' : '') + '><span>Drop it</span></label>' : '') + '</div>' +
-            '<div class="field' + (dec === 'cannot' ? '' : ' hidden') + '" data-f="reason_' + esc(cssId(r.itemId)) + '"><label>Why could you not do it?</label><input type="text" data-reason="' + esc(r.itemId) + '" value="' + esc(st.reasons[r.itemId] || '') + '" maxlength="200"><div class="err" role="alert"></div></div></div>';
+            '<div class="field' + (dec === 'cannot' ? '' : ' hidden') + '" data-f="reason_' + esc(cssId(r.itemId)) + '"><label for="rs_' + esc(cssId(r.itemId)) + '">Why could you not do it?</label><input type="text" id="rs_' + esc(cssId(r.itemId)) + '" data-reason="' + esc(r.itemId) + '" value="' + esc(st.reasons[r.itemId] || '') + '" maxlength="200"><div class="err" role="alert"></div></div></div>';
         });
         if (closed.length) h += '<p class="muted small">' + closed.length + ' already marked "could not do" or dropped.</p>';
         h += '<div class="formfoot"><button class="btn primary" data-act="s2">Next</button></div>';
       } else if (st.step === 2) {
         var defs = revDefs();
         var lp = (G().labPrompts || []).filter(function (p) { return p.kind === 'reflection' && (!p.weekIds || p.weekIds.indexOf(wk) >= 0); }).slice(0, 2);
-        h += '<h2>2. Look back</h2>' + (lp.length ? '<div class="panel gold flat">' + lp.map(function (p) { return '<p style="margin:.2rem 0">' + esc(p.text) + '</p>'; }).join('') + '</div>' : '') +
+        h += '<h2>2. Look back</h2>' + (lp.length ? '<div class="panel gold flat"><p style="margin:.2rem 0"><b>Ideas to help you think:</b></p>' + lp.map(function (p) { return '<p style="margin:.2rem 0">' + esc(p.text) + '</p>'; }).join('') + '</div>' : '') +
           '<form id="rvf" class="form" novalidate>' + fieldsHTML(defs, st) + '</form><div class="formfoot"><button class="btn ghost" data-act="s1">Back</button><button class="btn primary" data-act="s3">Next</button></div>';
       } else {
         var preview = try_(function () { return E().previewWeek(D, wk, now(), { decisions: st.decisions, nextPrefs: prefs() }); }, []) || [];
@@ -1900,14 +1931,14 @@
         h += '<h2>3. Next week</h2>' + (nr ? '<p class="muted">' + esc(nr.label) + '</p>' : '');
         h += '<div>' + preview.filter(function (r) { return r.source !== 'own'; }).map(function (r) {
           var optional = r.kind === 'optional';
-          return '<div class="ck"><span class="tick">' + (optional ? '<input type="checkbox" data-skip="' + esc(r.itemId) + '"' + (st.skip.indexOf(r.itemId) >= 0 ? '' : ' checked') + ' aria-label="Keep ' + esc(r.title) + '" style="width:24px;height:24px;accent-color:var(--pop)">' : ic('tick')) + '</span><div class="body"><div class="title">' + esc(r.title) + '</div><div class="meta">' + (r.source === 'carried' ? '<span class="chip warn">carried</span>' : '') + (r.kind === 'required' ? '<span class="chip pop">Must do</span>' : '') + (optional ? '<span class="chip">optional: untick to skip</span>' : '') + (r.dueDate ? '<span>Due ' + esc(fmt(r.dueDate)) + '</span>' : '') + '</div></div><span></span></div>';
+          return '<div class="ck"><span class="tick">' + (optional ? '<label class="skipbox"><input type="checkbox" data-skip="' + esc(r.itemId) + '"' + (st.skip.indexOf(r.itemId) >= 0 ? '' : ' checked') + ' aria-label="Keep ' + esc(r.title) + '"></label>' : ic('tick')) + '</span><div class="body"><div class="title">' + esc(r.title) + '</div><div class="meta">' + (r.source === 'carried' ? '<span class="chip warn">carried</span>' : '') + (r.kind === 'required' ? '<span class="chip pop">Must do</span>' : '') + (optional ? '<span class="chip">optional: untick to skip</span>' : '') + (r.dueDate ? '<span>Due ' + esc(fmt(r.dueDate)) + '</span>' : '') + '</div></div><span></span></div>';
         }).join('') + '</div>';
         var pas = live(D.planActions).filter(function (p) { return p.status === 'planned' && nextW && try_(function () { return E().weekIdOf(st.moved[p.id] || p.whenDate); }, '') === nextW; });
         var pasAll = live(D.planActions).filter(function (p) { return p.status === 'planned' && p.whenDate >= today(); });
         var bud = (opt('timeBudgets', (plan1() || {}).timeBudget) || {}).planPerWeek || 2;
         if (pas.length > bud) h += '<div class="note">You planned ' + pas.length + ' actions for next week. Your time budget suggests ' + bud + '. You can move some to another date.</div>';
         if (pasAll.length) {
-          h += '<h3>Move a planned action</h3>' + pasAll.map(function (p) { return '<div class="field"><label>' + esc(clip(p.what, 60)) + '</label><input type="date" data-move="' + esc(p.id) + '" min="2026-11-21" max="2027-01-15" value="' + esc(st.moved[p.id] || p.whenDate) + '"></div>'; }).join('');
+          h += '<h3>Move a planned action</h3><p class="hint">Change the date if you cannot do an action on the day you planned.</p>' + pasAll.map(function (p) { return '<div class="field"><label for="mv_' + esc(cssId(p.id)) + '">' + esc(clip(p.what, 60)) + '</label><input type="date" id="mv_' + esc(cssId(p.id)) + '" data-move="' + esc(p.id) + '" min="2026-11-21" max="2027-01-15" value="' + esc(st.moved[p.id] || p.whenDate) + '"></div>'; }).join('');
         }
         h += '<h3>My own items (' + st.own.length + ' of 5)</h3>' + st.own.map(function (o, i) { return '<div class="rowlink" style="min-height:44px"><span class="grow">' + esc(o.title) + '</span><button class="linkbtn" data-act="delown" data-i="' + i + '">Remove</button></div>'; }).join('');
         if (st.own.length < 5) h += '<div class="field" data-f="owntitle"><label for="f_owntitle">Add my own item</label><input id="f_owntitle" type="text" maxlength="80"><div class="err" role="alert"></div></div><button class="btn small ghost" data-act="addown">Add</button>';
@@ -2194,7 +2225,7 @@
         afterFresh(first);
       } else if (!D) {
         var code = r && r.error && r.error.code;
-        if (code === 'AUTH_REQUIRED') { api.clearDevice(); go('#/login'); return; }
+        if (code === 'AUTH_REQUIRED') { api.dropSession(); go('#/login'); return; }
         view.innerHTML = '<div class="note bad">' + esc(WIApi.NET_MSG) + '</div><button class="btn" id="retry">Try again</button>';
         document.getElementById('retry').addEventListener('click', boot);
       }

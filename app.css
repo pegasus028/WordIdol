@@ -156,7 +156,7 @@ body.no-nav .bottomnav, body.no-nav .fab { display: none; }
 .btn svg { width: 18px; height: 18px; flex: none; }
 .btnrow { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; }
 .btnrow.end { justify-content: flex-end; }
-.linkbtn { background: none; border: 0; color: var(--pop-ink); font: inherit; font-weight: 600; cursor: pointer; padding: .6rem .2rem; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; }
+.linkbtn { display: inline-flex; align-items: center; gap: .25rem; background: none; border: 0; color: var(--pop-ink); font: inherit; font-weight: 600; cursor: pointer; padding: .6rem .2rem; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; }
 .iconbtn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); display: inline-grid; place-items: center; cursor: pointer; flex: none; }
 .iconbtn:hover { background: var(--surface-2); }
 .iconbtn svg { width: 22px; height: 22px; }
@@ -262,7 +262,7 @@ body.no-nav .bottomnav, body.no-nav .fab { display: none; }
 .field .count { color: var(--ink-3); font-size: .8rem; text-align: right; margin-top: .2rem; }
 .field .count.over { color: var(--bad); }
 fieldset { border: 0; padding: 0; margin: 0 0 1.1rem; min-width: 0; }
-input[type=text], input[type=date], input[type=url], input[type=number], input[type=password], input[type=tel], input[type=search], select, textarea {
+input[type=text], input[type=date], input[type=datetime-local], input[type=url], input[type=number], input[type=password], input[type=tel], input[type=search], select, textarea {
   width: 100%; font: 16px/1.4 var(--f-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line);
   border-radius: var(--r-md); padding: .65rem .75rem; min-height: 46px;
 }
@@ -460,3 +460,14 @@ html { scroll-padding-top: 64px; scroll-padding-bottom: calc(var(--nav-h) + 96px
 .rowlink > svg, .rowlink .grow + svg, .hubcard > svg { width: 22px; height: 22px; flex: none; color: var(--ink-3); }
 .chip svg, .note svg, .lockline svg, .tickline svg { width: 16px; height: 16px; flex: none; vertical-align: -3px; }
 .linkbtn svg { width: 18px; height: 18px; vertical-align: -4px; }
+
+/* review step 3: a 44 px tap target around the "keep this optional item" box */
+.skipbox { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin: -.6rem; cursor: pointer; }
+.skipbox input { width: 24px; height: 24px; accent-color: var(--pop); }
+/* plan: the seven stages in order */
+.stagelist { list-style: none; margin: .8rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.stagelist li { padding: .3rem .7rem; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-size: .9rem; display: inline-flex; align-items: center; gap: .35rem; }
+.stagelist li b { color: var(--gold-ink); }
+.stagelist li.now { background: var(--pop-soft); color: var(--pop-ink); font-weight: 700; }
+.timeline .stagetag { color: var(--gold-ink); font-weight: 600; }
+.wavegrid .err { color: var(--bad); font-weight: 600; }

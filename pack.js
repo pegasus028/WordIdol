@@ -310,7 +310,7 @@
     return function (D) {
       var s = waveStats(D, waveId);
       var name = 'Wave ' + waveId.slice(1);
-      if (!s) return fact(name + ' results', { empty: name + ' results are not published yet. They appear here when T.Chris publishes them.', route: '#/charts' });
+      if (!s) return fact(name + ' results', { empty: name + ' results are not published yet. They appear here when T.Chris publishes them. You can write the other sections now.' });
       var rows = s.rows.map(function (r) {
         return [(r.kind === 'me' ? 'My word: ' : (r.kind === 'control' ? 'Control: ' : 'Foil: ')) + r.termText, String(r.n), pctText(r.rec), pctText(r.notSure), pctText(r.comp)];
       });
@@ -326,7 +326,8 @@
   function waveNoteFact(waveId) {
     return function (D) {
       var n = waveNote(D, waveId), name = 'Wave ' + waveId.slice(1);
-      if (!n || !txt(n.note)) return fact('My ' + name + ' note', { empty: 'You have not written your ' + name + ' note yet.', route: '#/charts' });
+      if (!waveStats(D, waveId)) return fact('My ' + name + ' note', { empty: 'You can write your ' + name + ' note on the Charts screen when the results are published.' });
+      if (!n || !txt(n.note)) return fact('My ' + name + ' note', { empty: 'You have not written your ' + name + ' note yet.', route: '#/charts', routeLabel: 'Write my ' + name + ' note' });
       var rows = [['What it tells me', n.note]];
       var hc = obj(n.hypothesisChecks);
       arr(wordOf(D).hypotheses).forEach(function (h, i) { if (hc[h.id]) rows.push(['Hypothesis ' + (i + 1), label('hypStatuses', hc[h.id])]); });
@@ -599,7 +600,7 @@
     var h = '<div class="wp-fact" data-fact="' + esc(key) + '"><h4>' + esc(f.title) + '</h4>';
     if (f.empty) {
       h += '<p class="wp-empty">' + esc(f.empty) + '</p>';
-      if (f.route) h += '<button type="button" class="linkbtn" data-go="' + esc(f.route) + '">Go and fill it in</button>';
+      if (f.route) h += '<button type="button" class="linkbtn" data-go="' + esc(f.route) + '">' + esc(f.routeLabel || 'Go and fill it in') + '</button>';
       return h + '</div>';
     }
     if (arr(f.rows).length) {
@@ -1191,7 +1192,8 @@
     var status = (row && row.status) || 'draft';
     var dkey = 'wi.draft.report.' + type;
     var draft = draftGet(dkey), fromDraft = false;
-    if (draft && draft.sections && (!row || !row.updatedAt || String(draft.at || '') > String(row.updatedAt))) {
+    // a draft is removed after every clean save, so one that is still here and not older than the saved row holds newer text
+    if (draft && draft.sections && (!row || !row.updatedAt || String(draft.at || '') >= String(row.updatedAt))) {
       var differs = Object.keys(draft.sections).some(function (k) { return txt(draft.sections[k]) !== txt(sections[k]); });
       if (differs) { sections = Object.assign(sections, draft.sections); fromDraft = true; }
     }
@@ -1290,8 +1292,14 @@
       var s = collect(), chk = reportCheck(type, s);
       var st = newStatus || status;
       if (st === 'ready' && !chk.ready) st = 'draft'; // a ready report that no longer meets the counts goes back to draft
+      var sent = JSON.stringify(s);
       return doSave(ctx, 'report.save', { type: type, sections: s, status: st }, stateNode).then(function (r) {
-        if (r.ok) { status = st; dirty = false; draftDel(dkey); paintStatus(); }
+        if (r.ok) {
+          status = st; paintStatus();
+          // she may have typed more while this save was on its way: keep that text as a draft
+          if (JSON.stringify(collect()) === sent) { dirty = false; draftDel(dkey); }
+          else { dirty = true; draftSet(dkey, { sections: collect(), at: nowIso(ctx) }); setSaveState(stateNode, '', 'Saved on this phone'); }
+        }
         return r;
       });
     }
@@ -1340,11 +1348,12 @@
     var note = waveNote(D, waveId);
     var dkey = 'wi.draft.charts.' + waveId;
     var draft = draftGet(dkey);
-    var noteText = (draft && draft.note != null && (!note || !note.updatedAt || String(draft.at || '') > String(note.updatedAt))) ? draft.note : (note ? note.note || '' : '');
+    var noteText = (draft && draft.note != null && (!note || !note.updatedAt || String(draft.at || '') >= String(note.updatedAt))) ? draft.note : (note ? note.note || '' : '');
     var hc = Object.assign({}, obj(note && note.hypothesisChecks), obj(draft && draft.hypothesisChecks));
     var h = '<section class="panel wp-wave" data-wavecard="' + esc(waveId) + '">';
     h += '<div class="wp-wave-h"><h2>' + esc(name) + ' results</h2><span class="chip">' + esc(fmtDate(s.date) || 'Published') + '</span></div>';
     if (s.classesNote) h += '<p class="muted small">Classes surveyed: ' + esc(s.classesNote) + '</p>';
+    h += '<p class="small muted">Control words are real slang words that are already in use. Foil words are invented for the survey. Corrected recognition = the share who say they know your word, minus the share who say they know the foils.</p>';
     if (me) {
       var bad = me.corrected != null && pctNum(me.corrected) <= 0;
       h += '<div class="wp-hero"><span class="wp-hero-k">Corrected recognition of <b>' + esc(me.termText) + '</b></span>' +
@@ -1362,7 +1371,7 @@
     h += '</tbody></table></div>';
     var ctrls = s.rows.filter(function (r) { return r.kind === 'control' && r.corrected != null; });
     h += '<ul class="wp-ul small">';
-    if (s.foilRate != null) h += '<li>Foil words are invented, so nobody really knows them. Foil rate = the mean of the two foils = <b>' + esc(pctText(s.foilRate)) + '</b>.</li>';
+    if (s.foilRate != null) h += '<li>Foil words are invented, so nobody really knows them. Foil rate = the average of the two foils = <b>' + esc(pctText(s.foilRate)) + '</b>.</li>';
     ctrls.forEach(function (r) { h += '<li>Corrected recognition of the control <i>' + esc(r.termText) + '</i>: ' + esc(pctText(r.rec)) + ' − ' + esc(pctText(s.foilRate)) + ' = ' + esc(pctText(r.corrected)) + '.</li>'; });
     h += '<li>Understand = the share of everyone asked who picked the correct meaning.</li></ul>';
     h += chartCardHTML('ch_compare', D, { waveId: waveId, title: 'Recognition in ' + name, caption: 'Your word beside the controls and foils. The line shows the foil rate.' });

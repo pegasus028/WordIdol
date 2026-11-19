@@ -261,7 +261,7 @@ function nodeTests() {
     // in a person-like context (the label followed by "says" or an apostrophe-s, or after "as"/"by"/"from"/"with"/"and").
     var common = { Sun: 1, Pin: 1, Proud: 1, Mint: 1, Donut: 1 };
     labels.forEach(function (l) {
-      var re = common[l] ? new RegExp('\\b(as|by|from|with|and) ' + l + '\\b|\\b' + l + '[\u2019\']s\\b') : new RegExp('\\b' + l + '\\b');
+      var re = common[l] ? new RegExp('\\b(as|by|from|with|and) ' + l + '\\b|\\b' + l + '[\u2019\\x27]s\\b') : new RegExp('\\b' + l + '\\b');
       ok(!re.test(s), f + ' has no student label');
     });
     if (f.indexOf('tests/') === 0) return;
@@ -407,6 +407,7 @@ async function browserTests() {
     var D2 = fixture({ w1: false }); D2.word.fudge = null;
     await render(page, 'report', D2, 1, 'baseline');
     ok((await page.textContent('[data-sec="wave1"]')).indexOf('not published yet') >= 0, 'unpublished Wave 1 explained');
+    ok(!(await page.$('[data-sec="wave1"] [data-go]')), 'no "go and fill it in" button for an unpublished wave (nothing for her to fill)');
     await page.click('[data-sec="fudge"] [data-fact="word.fudge"] [data-go]');
     eq(await page.evaluate(function () { return window.__go[window.__go.length - 1]; }), '#/audition', 'empty FUDGE fact links to #/audition');
     // submitted needs ready first (aria-disabled, but a tap explains why)
@@ -461,7 +462,7 @@ async function browserTests() {
     var meRow = await page.textContent('[data-wavecard="W1"] tr.me');
     ok(meRow.indexOf('flumsy') >= 0 && meRow.indexOf('100') >= 0 && meRow.indexOf('40%') >= 0 && meRow.indexOf('10%') >= 0 && meRow.indexOf('30%') >= 0, 'her row: n, know, not sure, understand');
     var wt = await page.textContent('[data-wavecard="W1"]');
-    ok(wt.indexOf('Foil rate = the mean of the two foils = 15%') >= 0, 'foil rate explained');
+    ok(wt.indexOf('Foil rate = the average of the two foils = 15%') >= 0, 'foil rate explained');
     ok(wt.indexOf('aura farming: 70% − 15% = 55%') >= 0, 'control corrected shown');
     ok(wt.indexOf('Classes surveyed: M2/3, M3/1') >= 0, 'classes note shown');
     eq(await page.locator('[data-wavecard="W1"] input[data-hyp]').count(), 0, 'no hypothesis checks on Wave 1');

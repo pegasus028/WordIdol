@@ -17,6 +17,8 @@
   function fmtTime(iso) { if (!iso) return ''; var t = String(iso); return fmt(t) + (t.length > 15 ? ' ' + t.slice(11, 16) : ''); }
   function CH(l) { return (root.WI_CHOICES && root.WI_CHOICES[l]) || []; }
   function lab(l, id) { var o = CH(l).filter(function (x) { return String(x.id) === String(id); })[0]; return o ? (o.shownAs || o.label) : (id == null ? '' : String(id)); }
+  /* the student sees this idea as "ask T.Chris first"; the teacher needs its real name */
+  function ideaName(id) { var o = CH('ideas').filter(function (x) { return String(x.id) === String(id); })[0]; return o ? o.label : (id || ''); }
   function qs(s, el) { return (el || document).querySelector(s); }
   function qsa(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
   function live(l) { return (l || []).filter(function (r) { return r && r.deleted !== true; }); }
@@ -188,7 +190,7 @@
         '<button class="btn small ghost" data-act="pin">Reset PIN</button></div>';
       var openFlags = (B.flags || []).filter(function (f) { return f.status === 'open'; });
       openFlags.forEach(function (f) { h += '<div class="note bad"><b>Problem flag:</b> ' + esc(lab('problemCategories', f.category)) + ' (' + esc(fmtTime(f.createdAt)) + ')' + (f.note ? '<br>' + esc(f.note) : '') + '<br><button class="btn small" data-act="handle" data-id="' + esc(f.id) + '">Mark as handled</button></div>'; });
-      (B.requests || []).filter(function (q) { return q.status === 'pending'; }).forEach(function (q) { h += '<div class="note"><b>Request (' + esc(q.type === 'ask_first' ? 'ask T.Chris first' : 'word change') + '):</b> ' + esc(q.text) + '<div class="btnrow"><button class="btn small primary" data-act="req" data-d="approved" data-id="' + esc(q.id) + '">Approve</button><button class="btn small" data-act="req" data-d="declined" data-id="' + esc(q.id) + '">Decline</button></div></div>'; });
+      (B.requests || []).filter(function (q) { return q.status === 'pending'; }).forEach(function (q) { h += '<div class="note"><b>Request (' + esc(q.type === 'ask_first' ? 'ask T.Chris first: ' + ideaName(q.ideaId) : 'word change') + '):</b> ' + esc(q.text) + '<div class="btnrow"><button class="btn small primary" data-act="req" data-d="approved" data-id="' + esc(q.id) + '">Approve</button><button class="btn small" data-act="req" data-d="declined" data-id="' + esc(q.id) + '">Decline</button></div></div>'; });
       h += '<div class="seg" role="tablist" style="margin:1rem 0">' + [['timeline', 'Timeline'], ['week', 'Week'], ['summit', 'Summit readiness'], ['article', 'Article readiness'], ['feedback', 'Feedback']].map(function (t) { return '<a role="tab" href="#/s/' + esc(sid) + '/' + t[0] + '" aria-selected="' + (t[0] === tab) + '">' + t[1] + '</a>'; }).join('') + '</div>';
       h += '<div id="tabbody"></div>';
       render(h);
@@ -323,10 +325,10 @@
         h += '<section class="section"><h2>Terms to approve (' + terms.length + ')</h2>' + (terms.length ? terms.map(function (x) {
           var changed = x.hist.filter(function (hh) { return x.w.regDecidedAt && hh.at > x.w.regDecidedAt; });
           return '<div class="panel flat"><h3>' + esc(labelOf(x.sid)) + ': ' + esc(x.w.word) + (changed.length ? ' <span class="chip warn">word change</span>' : '') + '</h3>' + kv([['Meaning', x.w.meaning], ['Part of speech', lab('pos', x.w.pos)], ['Formation', lab('formations', x.w.formation)], ['Purpose', x.w.purpose], ['Examples', [x.w.example1, x.w.example2, x.w.example3].filter(Boolean).join('\n')], ['Zero baseline', x.w.zb ? (x.w.zb.places || []).map(function (p) { return lab('zbPlaces', p.placeId) + ': ' + lab('zbResults', p.result); }).join('; ') : '']]) +
-            (changed.length ? kv(changed.map(function (c) { return ['Changed ' + c.field, c.oldValue + ' → ' + c.newValue]; })) : '') +
+            (changed.length ? kv(changed.map(function (c) { return ['Changed ' + c.field, c.oldValue + ' changed to ' + c.newValue]; })) : '') +
             '<div class="btnrow"><button class="btn small primary" data-act="approve" data-sid="' + esc(x.sid) + '">Approve term</button><a class="btn small ghost" href="#/s/' + esc(x.sid) + '">Ask for changes on her page</a></div></div>';
         }).join('') : '<p class="muted">None.</p>') + '</section>';
-        h += '<section class="section"><h2>Requests (' + reqs.length + ')</h2>' + (reqs.length ? reqs.map(function (x) { return '<div class="panel flat"><b>' + esc(labelOf(x.sid)) + '</b> (' + esc(x.q.type === 'ask_first' ? 'ask T.Chris first: ' + lab('ideas', x.q.ideaId) : 'word change') + ')<p>' + esc(x.q.text) + '</p><div class="btnrow"><button class="btn small primary" data-act="req" data-d="approved" data-id="' + esc(x.q.id) + '">Approve</button><button class="btn small" data-act="req" data-d="declined" data-id="' + esc(x.q.id) + '">Decline</button></div></div>'; }).join('') : '<p class="muted">None.</p>') + '</section>';
+        h += '<section class="section"><h2>Requests (' + reqs.length + ')</h2>' + (reqs.length ? reqs.map(function (x) { return '<div class="panel flat"><b>' + esc(labelOf(x.sid)) + '</b> (' + esc(x.q.type === 'ask_first' ? 'ask T.Chris first: ' + ideaName(x.q.ideaId) : 'word change') + ')<p>' + esc(x.q.text) + '</p><div class="btnrow"><button class="btn small primary" data-act="req" data-d="approved" data-id="' + esc(x.q.id) + '">Approve</button><button class="btn small" data-act="req" data-d="declined" data-id="' + esc(x.q.id) + '">Decline</button></div></div>'; }).join('') : '<p class="muted">None.</p>') + '</section>';
         render(h);
         acts({
           handle: function (b) { handleFlag(b.getAttribute('data-id'), route); },
@@ -383,35 +385,54 @@
           qs('[data-cor="' + x.termKey + '"]', form).textContent = t && t.corrected != null ? Math.round(t.corrected) + '%' : '';
         });
       }
-      function check() {
-        var ok = true;
-        collect().forEach(function (o) {
+      /* A row left completely empty is not part of this save (a student with no word yet, or a
+         wave typed in two sittings). Controls and foils are needed before publishing. */
+      function blank(o) { var foil = /^foil/.test(o.termKey); return o.n == null && o.recognised == null && o.notSure == null && (foil || o.comprehended == null); }
+      var checked = false, lastPublish = false;
+      function check(publish) {
+        var ok = true; checked = true; lastPublish = !!publish;
+        var all = collect();
+        all.forEach(function (o) {
           var m = '';
-          var chk = try_(function () { return E().waveCheck(o); }, null);
-          if (o.n == null || o.recognised == null || o.notSure == null || o.comprehended == null) m = 'Fill in every box.';
-          else if (chk && !chk.ok) m = chk.message || 'Please check this row.';
-          else if (o.n < 1 || o.n > 999) m = 'n is from 1 to 999.';
-          else if (o.recognised + o.notSure > o.n) m = 'Recognised plus not sure cannot be more than n.';
+          var fixed = /^(ctrl|foil)/.test(o.termKey);
+          if (blank(o)) m = publish && fixed ? 'Controls and foils are needed before you publish.' : '';
+          else if (o.n == null || o.recognised == null || o.notSure == null || o.comprehended == null) m = 'Fill in every box of this row, or leave the whole row empty.';
+          else {
+            var chk = try_(function () { return E().waveCheck(o); }, null);
+            if (chk && !chk.ok) m = chk.message || 'Please check this row.';
+            else if (o.n < 1 || o.n > 999) m = 'n is from 1 to 999.';
+            else if (o.recognised + o.notSure > o.n) m = 'Recognised plus not sure cannot be more than n.';
+            else if (o.comprehended > o.n) m = 'Comprehended cannot be more than n.';
+          }
           var e = qs('[data-err="' + o.termKey + '"]', form); e.textContent = m;
           qs('[data-row="' + o.termKey + '"]', form).classList.toggle('invalid', !!m);
           if (m) ok = false;
         });
         var d = qs('#wdate', form).value;
-        setErr(form, 'wdate', d ? '' : 'Please choose the date.');
+        setErrQuiet('wdate', d ? '' : 'Please choose the date.');
+        if (ok && !all.some(function (o) { return !blank(o); })) { ok = false; toast('Enter at least one row first.', 'err'); }
         return ok && !!d;
       }
-      form.addEventListener('input', calc);
+      function setErrQuiet(id, msg) { var f = qs('[data-f="' + id + '"]', form); if (!f) return; f.classList.toggle('invalid', !!msg); qs('.err', f).textContent = msg || ''; }
+      form.addEventListener('input', function () { calc(); if (checked) check(lastPublish); });
+      form.addEventListener('change', function () { if (checked) check(lastPublish); });
       calc();
       function send(publish) {
-        if (!check()) { toast('Please check the rows marked in red.', 'err'); return; }
-        call('t.wave.save', { waveId: waveId, date: qs('#wdate', form).value, classesNote: qs('#wnote', form).value.trim(), rows: collect(), publish: publish }).then(function (x) {
+        if (!check(publish)) { toast('Please check the rows marked in red.', 'err'); return; }
+        var filled = collect().filter(function (o) { return !blank(o); }).map(function (o) { if (/^foil/.test(o.termKey)) o.comprehended = 0; return o; });
+        call('t.wave.save', { waveId: waveId, date: qs('#wdate', form).value, classesNote: qs('#wnote', form).value.trim(), rows: filled, publish: publish }).then(function (x) {
           if (x.ok) { toast(publish ? 'Published. Students can see it now.' : 'Saved as a draft.'); route(); }
           else { var f = x.error && x.error.field; var m = f && /^rows\.([^.]+)\./.exec(f); if (m) { var e = qs('[data-err="' + m[1] + '"]', form); if (e) e.textContent = errMsg(x); } toast(errMsg(x), 'err'); }
         });
       }
+      function emptyStudents() { return collect().filter(function (o) { return blank(o) && !/^(ctrl|foil)/.test(o.termKey); }).length; }
       acts({
         save: function () { send(false); },
-        publish: function () { confirmBox('Publish Wave ' + waveId.slice(1) + '?', 'Each student will see the results for her own term, the controls and the foils.', 'Publish').then(function (y) { if (y) send(true); }); },
+        publish: function () {
+          if (!check(true)) { toast('Please check the rows marked in red.', 'err'); return; }
+          var n = emptyStudents();
+          confirmBox('Publish Wave ' + waveId.slice(1) + '?', 'Each student will see the results for her own term, the controls and the foils.' + (n ? ' ' + n + (n === 1 ? ' student row is' : ' student rows are') + ' empty: ' + (n === 1 ? 'that student' : 'those students') + ' will see the controls and foils only.' : ''), 'Publish').then(function (y) { if (y) send(true); });
+        },
         unpublish: function () { send(false); }
       });
     });

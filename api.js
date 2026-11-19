@@ -314,8 +314,11 @@
     this.login = function (studentId, pin) {
       return post('login', { studentId: studentId, pin: pin }).then(function (res) {
         if (res.ok) {
-          var old = LS.get(KEYS.session);
-          if (old && old.student && old.student.id !== studentId) { LS.del(KEYS.cache); LS.del(KEYS.queue); }
+          // Unsent work on this device belongs to whoever used it last (the old session, or the cache
+          // left behind when a session was ended by the server). Keep it only for the same student.
+          var old = LS.get(KEYS.session), cached = LS.get(KEYS.cache);
+          var owner = (old && old.student && old.student.id) || (cached && cached.student && cached.student.id) || null;
+          if (owner !== studentId) { LS.del(KEYS.cache); LS.del(KEYS.queue); LS.del(KEYS.is16); LS.keys('wi.draft.').forEach(LS.del); D = null; }
           LS.set(KEYS.session, { token: res.data.token, expiresAt: res.data.expiresAt, student: res.data.student });
         }
         return res;
@@ -416,6 +419,9 @@
       var p = t ? post('logout', {}, t) : Promise.resolve({ ok: true });
       return p.then(function () { self.clearDevice(); return { ok: true }; });
     };
+    /* the server ended this session (PIN reset, expiry): forget the token only, so that the
+       same student can sign in again and her unsent work and drafts are still there */
+    this.dropSession = function () { LS.del(KEYS.session); };
     /* shared-device rule (§8.4) */
     this.clearDevice = function () {
       LS.del(KEYS.session); LS.del(KEYS.cache); LS.del(KEYS.queue); LS.del(KEYS.is16);
