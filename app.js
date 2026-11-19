@@ -1482,7 +1482,7 @@
     if (!p) h += '<div class="note">Make your choices first, so you can pick from your ideas and target groups. <a href="#/debut/choices">My choices</a></div>';
     h += pas.length ? '<ul class="list">' + pas.map(function (a) {
       var ch = opt('channels', a.where) || {};
-      var lockedTxt = ch.online && !onlineOpen() ? ' <span class="chip warn">' + ic('lock') + 'locked until unlocked</span>' : '';
+      var lockedTxt = ch.online && !onlineOpen() ? ' <span class="chip warn">' + ic('lock') + 'online: opens Thu 26 Nov</span>' : '';
       return '<li><a class="rowlink" href="#/debut/table/' + esc(a.id) + '"><span class="grow"><span class="t">' + esc(a.what) + '</span><span class="s">' + esc(fmt(a.whenDate)) + ', ' + esc(ch.label || a.where) + (a.status && a.status !== 'planned' ? ', ' + esc(a.status) : '') + '</span>' + lockedTxt + '</span>' + ic('right', 'chev') + '</a></li>';
     }).join('') + '</ul>' : '<div class="empty"><strong>No actions yet.</strong>Add your first planned action.</div>';
     h += '<div class="btnrow"><a class="btn primary" href="#/debut/table/new">Add an action</a><button class="btn ghost" data-act="ideas">' + ic('bulb') + 'Give me ideas</button></div>';
@@ -1503,7 +1503,7 @@
       '<form id="wf" class="form" novalidate>' + fieldsHTML(defs, vals) + '<div id="onl"></div>' +
       '<div class="formfoot"><button class="btn primary" type="button" data-act="save">Save</button>' + (isNew ? '<button class="btn ghost" type="button" data-act="ideas">' + ic('bulb') + 'Give me ideas</button>' : '<button class="btn danger" type="button" data-act="del">Delete</button>') + saveStateHTML() + '</div></form>');
     var el = qs('#wf');
-    function onl(v) { var ch = opt('channels', v.where) || {}; qs('#onl').innerHTML = ch.online && !onlineOpen() ? '<div class="note">' + ic('lock') + ' You can plan this now. It stays locked until online actions open for you, so you cannot log it as done before then.</div>' : ''; }
+    function onl(v) { var ch = opt('channels', v.where) || {}; qs('#onl').innerHTML = ch.online && !onlineOpen() ? '<div class="note">' + ic('lock') + ' You can plan this now. Online actions open after the L9 safety briefing (Thu 26 Nov, 16:30) once you have ticked all six rules. You cannot log it as done before then.</div>' : ''; }
     var lf = liveForm(el, defs, { draft: dk, onChange: onl });
     onl(vals);
     acts({
