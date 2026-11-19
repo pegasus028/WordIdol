@@ -1095,7 +1095,9 @@
     var out = [];
     if (arr(obj(D).flags).some(function (f) { return f.status !== 'handled'; })) out.push('F_PROBLEM');
     var la = lastActivity(D);
-    if (!la || parse(nowIso) - la >= 7 * DAY) out.push('F_QUIET');
+    // a student who has not started yet counts from launch day (Sat 21 Nov), not from never (lead, 19 Nov)
+    var since = la || parse('2026-11-21T00:00:00+07:00');
+    if (parse(nowIso) - since >= 7 * DAY) out.push('F_QUIET');
     var soon = WI.milestones().filter(function (m) { var d = WI.daysLeft(m.date, nowIso); return d >= 0 && d <= 3; });
     var deadline = soon.some(function (m) {
       var reqs = WI.milestoneRequirements(m.id);
