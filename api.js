@@ -277,6 +277,9 @@
     var self = this;
     var flushing = null;
     var waiters = {};
+    /* ops the server confirmed recently, with the time the reply arrived: a bootstrap that was
+       already in flight may carry an older snapshot, so these are applied again on top of it */
+    var recent = [];
     var D = null;
 
     this.on = ev.on;
@@ -332,6 +335,8 @@
         if (res.ok && res.data) {
           if (res.data.state && D) { D.state = res.data.state; persist(); }
           emitGained(res.data);
+          // direct writes (uploads) are kept too, so an older in-flight bootstrap cannot hide them
+          if (/^file\./.test(action)) { recent.push({ t: Date.now(), op: { action: action, data: data || {} }, data: res.data }); if (recent.length > 60) recent.shift(); }
         }
         return res;
       });
@@ -344,9 +349,13 @@
     }
 
     this.bootstrap = function () {
+      var sentAt = Date.now();
       return self.call('bootstrap', {}).then(function (res) {
         if (res.ok) {
           D = ensureLists(res.data);
+          // saves confirmed while this bootstrap was on its way may be missing from its snapshot
+          recent = recent.filter(function (x) { return Date.now() - x.t < 120000; });
+          recent.forEach(function (x) { if (x.t >= sentAt) { applyOp(D, x.op); mergeResult(D, x.op, x.data); } });
           self.queue().forEach(function (op) { applyOp(D, op); }); // keep unsent work visible
           persist();
         }
@@ -390,6 +399,8 @@
             if (!op) return;
             if (r.ok) {
               done[r.opId] = 1;
+              recent.push({ t: Date.now(), op: op, data: r.data });
+              if (recent.length > 60) recent.shift();
               mergeResult(D, op, r.data);
               emitGained(r.data);
               settle(r.opId, { ok: true, data: r.data });
