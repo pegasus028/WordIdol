@@ -1069,3 +1069,15 @@ Checked against the Project docs; changes made to the Fable draft:
 - Teacher overview shows sightings (owned / earned) to the teacher only.
 - Handover §8 acceptance checks merged (wrong-PIN data read, `QA-REPORT.md`, new Apps Script version).
 - Dropped the question about launching before Wave 1: Chris chose in-person launch from Sat 21 Nov.
+
+## 19. Build decisions (lead, 19 Nov, after the reviews)
+- **Workload:** F-W05-01 (Intermediate report), F-W05-04 (two rehearsals) and F-W05-05 (five Q&A answers) are shown from W04, with the same due dates.
+- **Habits do not carry over:** weekly habit items (H-Wnn-x) expire at roll-over; only non-habit required and recommended items carry. A missed review is still asked for by the review screen.
+- **Online gate (P9):** even a teacher unlock needs all six rules ticked; the teacher can unlock before 26 Nov 16:30.
+- **Lockout:** student lockouts escalate (5, 10, 20 … minutes, up to 6 hours) and a lockout blocks new sign-ins only; it no longer signs out existing sessions (so nobody can sign a student out with wrong PINs). Upload cap 100 a day per student.
+- **XP:** a one-tap "Nothing to add" review of a missed week earns no XP. Own items earn 0 XP; pool items 5.
+- **C-ASK** ticks itself once T.Chris answers the request (new predicate `request.askFirst`).
+- **AI-use declaration:** at least 10 words everywhere (suggested sentence: "I did not use AI tools for any part of this report.").
+- **Sightings:** the "marked" example reads "as my friend says" (no real names in the repo). SPEC.md in the public repo carries no student labels.
+- **Front end:** a session that ends on the server sends her to sign-in without losing her unsent work; another student signing in on the same device clears the first student's cache and queue.
+- **Deploy:** standalone Apps Script project "WordIdol backend" (files Code.gs, Shared.gs, private Roster.gs); evidence folder "WordIdol Evidence" in Chris's Drive.
