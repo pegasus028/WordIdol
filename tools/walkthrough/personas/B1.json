@@ -1,0 +1,142 @@
+{
+  "id": "B1",
+  "level": "B1",
+  "studentId": "g1",
+  "label": "Guest#1",
+  "about": "Simulated M4 student at CEFR B1. Simple sentences, small typical Thai-learner errors (articles, plural -s, past tense, 'I not finish'), but always understandable. In person only, light time budget. Written by Claude for the W6 walkthrough; not a real student.",
+  "timing": {
+    "readWpm": 100,
+    "readShare": 0.75,
+    "rereadShare": 0.2,
+    "orientSec": 25,
+    "typeCpm": 55,
+    "thinkPerField": 40,
+    "secPerChoice": 8,
+    "uploadSec": 120,
+    "zbSearchSec": 900,
+    "reportPlanSec": 420,
+    "copySec": 30,
+    "heavyScreenWords": 350
+  },
+  "slips": ["card.notRude"],
+  "probes": [
+    {"term": "FUDGE", "re": "FUDGE", "note": "\"FUDGE\" and its five letter names (Frequency, Unobtrusiveness, Diversity, Generation, Endurance) are hard words at B1; \"Unobtrusiveness\" is explained but the label itself stays on the slider.", "screen": "audition/fudge"},
+    {"term": "zero-baseline", "re": "zero-baseline", "note": "\"Zero-baseline record\" is a research term; the hub line \"Search six places for your word before you launch it\" helps, but a B1 student may not know \"baseline\".", "screen": "audition/zb"},
+    {"term": "hypothesis", "re": "hypothes", "note": "\"Research question and hypotheses\": the B1 student needs the sentence frames, which are folded away under \"Sentence frames\".", "screen": "audition/hyp"},
+    {"term": "Evidence Level", "re": "Evidence Level", "note": "Evidence Levels 0–6 with \"owned\" and \"earned\": the level names (Self-report, Earned inside your network …) are abstract; she has to open \"What do the levels mean?\" to choose.", "screen": "log/sighting"},
+    {"term": "corrected recognition", "re": "corrected recognition", "note": "\"Corrected recognition\" (in the metric list and the Wave 1 prompt) is not explained where she meets it.", "screen": "audition/hyp"},
+    {"term": "semantic shift", "re": "semantic shift", "note": "Formation list: \"semantic shift\", \"conversion\" and \"coinage\" are glossary words from L3; there is no hint on the word card.", "screen": "audition/card"},
+    {"term": "rules-wording", "screen": "debut/rules", "re": "DM strangers", "note": "The six rules are written as teacher's notes (\"Advised to create a new social media account for promotions.\", \"Not to DM strangers.\"). At B1 \"advised to\" and \"DM\" need explaining, and rule 1 is about social media although she chose \"In person only\"."},
+    {"term": "spec-results", "screen": "audition/spec", "re": "Does not fit my route", "note": "Spec sheet results are \"Passes / Not yet / Does not fit my route\": there is no plain \"Does not pass\". For R1 (her word has three syllables) she had to choose \"Does not fit my route\", which is about her route, not about the test."},
+    {"term": "marked", "screen": "log/sighting", "re": "Used it with a comment about the word", "note": "\"How did they use it?\": the option \"Used it with a comment about the word (for example “as my friend says”, quotation marks, a laugh)\" is long and abstract at B1; \"marked\" use is a linguistics idea she has not met in class yet."}
+  ],
+  "first": {
+    "word": "homeworry",
+    "meaning": "The worry feeling when your homework is not finish yet, for example on Sunday night before school.",
+    "example1": "My homeworry is very big tonight because I not finish my science report.",
+    "pos": "noun",
+    "posAlso": []
+  },
+  "card": {
+    "usageRules": "Use it like a noun: my homeworry, a big homeworry. Students say it to friends when they have many homework. You can say it in the chat or at school, not in formal writing.",
+    "forms": { "plural": "homeworries" },
+    "pronunciation": "home-worry, two parts together",
+    "formation": "blending",
+    "sourceWords": "homework + worry",
+    "example2": "On Sunday night my homeworry make me can not sleep early.",
+    "example3": "My friend said, \"Don't worry, I have homeworry too.\"",
+    "doNotUse": "Do not use it for a big problem in family or health. It is only for homework.",
+    "purpose": "Every student have this feeling but there is no short word. I want my friends to say it and feel we are the same."
+  },
+  "zb": {
+    "checkedAt": "2026-11-12",
+    "places": [
+      { "id": "zb_google", "result": "other_meaning", "note": "Only 'home' and 'worry' in news about house price." },
+      { "id": "zb_tiktok", "result": "none", "note": "" },
+      { "id": "zb_instagram", "result": "none", "note": "" },
+      { "id": "zb_x", "result": "none", "note": "" },
+      { "id": "zb_youtube", "result": "none", "note": "" },
+      { "id": "zb_urban", "result": "none", "note": "Nothing." }
+    ],
+    "statement": "I searched homeworry in six places. Nobody use my meaning. Google only show 'home worry' about house price.",
+    "shot": false
+  },
+  "fudge": {
+    "F": [2, "Students have homework every day, so we can say it a lot."],
+    "U": [1, "It sound like English, but some people think it is a mistake of homework."],
+    "D": [1, "Students can use it, but adults at work do not have homework."],
+    "G": [1, "Maybe people can say homeworried, but I am not sure."],
+    "E": [2, "Homework will never finish in Thailand, so the word can stay long time."]
+  },
+  "hyp": {
+    "researchQuestion": "Will M4 students know my word homeworry in the Wave 2 survey?",
+    "hypotheses": [
+      { "text": "At least 10% of students will recognise homeworry in Wave 2.", "metric": "recognition", "target": "10% by Wave 2" },
+      { "text": "More students will understand the meaning of homeworry in Wave 2 than in Wave 1.", "metric": "comprehension", "target": "more than Wave 1" }
+    ]
+  },
+  "spec": {
+    "R1": ["not_fit", "It has three syllables, home-wor-ry."],
+    "R2": ["pass", "My friends read it right the first time."],
+    "R3": ["pass", "Blend of homework and worry."],
+    "R4": ["pass", "We always worry about homework."],
+    "R5": ["pass", "My friend guess the meaning from one sentence."],
+    "R6": ["not_yet", "Now it is only a noun."],
+    "R7": ["not_yet", "Only about school now."],
+    "R8": ["not_yet", "Maybe homeworried."],
+    "R9": ["pass", "I found nothing with my meaning."],
+    "R10": ["pass", "It is polite and not about people."]
+  },
+  "choices": {
+    "targetGroups": ["tg_school", "tg_family"],
+    "ideas": ["id_speak", "id_askfriends"],
+    "platforms": ["pf_inperson"],
+    "is16": null,
+    "route": "utility",
+    "timeBudget": "light",
+    "who": "My friends in M4 English Program and my little sister at home.",
+    "why": "Because we have homework every day and we worry, but we do not have one word for this feeling.",
+    "what": "They will hear me say 'I have homeworry' at lunch and on Sunday night.",
+    "spark": "When teacher give a big homework on Friday, I say homeworry first.",
+    "projectAccount": ""
+  },
+  "planActions": [
+    { "where": "ch_school", "ideaId": "id_speak", "what": "Say homeworry to my friends at lunch on Monday", "why": "My friends always talk about homework at lunch.", "theoryTag": "th-stepps-triggers", "whenDate": "2026-11-23", "evidence": "journal", "targetGroup": "tg_school" },
+    { "where": "ch_home", "ideaId": "id_askfriends", "what": "Teach my little sister the word homeworry on Sunday night", "why": "She has homework too and she can say it at her school.", "theoryTag": "th-dense", "whenDate": "2026-11-29", "evidence": "tally", "targetGroup": "tg_family" },
+    { "where": "ch_school", "ideaId": "id_speak", "what": "Use homeworry in English club before the test", "why": "Students in the club are nervous for the test and need this word.", "theoryTag": "th-socialproof", "whenDate": "2026-12-02", "evidence": "sighting", "targetGroup": "tg_school" }
+  ],
+  "actions": [
+    { "dateOffset": -1, "planIndex": null, "channelId": "ch_school", "ideaId": "id_speak", "what": "I said homeworry to two friends after English class. I said 'I have big homeworry for math'.", "outcome": "as_planned", "outcomeReason": "", "audience": "p2_5", "reaction": "A classmate laughed and asked 'what is that?'. Then she understood.", "learned": "People understand more when I say homework in the same sentence." },
+    { "dateOffset": 0, "planIndex": 0, "channelId": "ch_school", "ideaId": "id_speak", "what": "I tried to say homeworry at lunch, but the canteen was very noisy.", "outcome": "changed", "outcomeReason": "I did it earlier than my plan and in the canteen, not in the classroom.", "audience": "p2_5", "reaction": "Only one friend heard me. The others did not hear.", "learned": "A quiet place is better. Next time I say it in the classroom before lesson." }
+  ],
+  "journal": [
+    { "kind": "reflection", "dateOffset": 0, "text": "This week I started my word homeworry. I said it to two friends after English class and one classmate asked what it mean. When I said 'I have big homeworry for math', she understood quickly. I think homework in the same sentence help people to guess. My next step is to teach my little sister on Sunday night, because she also has a lot of homework." },
+    { "kind": "failure_analysis", "dateOffset": 0, "text": "My lunch action did not work well. The canteen was too noisy and only one friend heard my word. I think the problem was the place, not the word. In a noisy place people cannot hear a new word clearly, so they cannot repeat it. Next time I will say it in the classroom before the lesson starts, when everybody is quiet and talking about homework." }
+  ],
+  "sightings": [
+    { "dateOffset": 0, "channelId": "ch_school", "relation": "classmate", "quote": "I have homeworry for the science report too.", "context": "After English class, talking about homework.", "prompted": "unasked", "marked": "natural", "topic": "school", "posUsed": "noun", "derivedForm": "", "level": 4, "verifiable": false, "openLevels": true },
+    { "dateOffset": 0, "channelId": "ch_home", "relation": "me", "quote": "Mom, I have homeworry tonight.", "context": "At home on the evening, my mother asked about homework.", "prompted": "asked", "marked": "marked", "topic": "family", "posUsed": "noun", "derivedForm": "", "level": 1, "verifiable": false, "shot": true, "shotCaption": "HOMEWORRY_note_" },
+    { "dateOffset": -1, "channelId": "ch_out", "relation": "friend_out", "quote": "My friend said her cousin used homeworry.", "context": "My friend from tutor school told me, I did not hear it myself.", "prompted": "unsure", "marked": "unsure", "topic": "school", "posUsed": "unsure", "derivedForm": "", "level": 0, "verifiable": false }
+  ],
+  "tallies": [
+    { "dateOffset": 0, "tallyType": "said", "count": 6, "context": "ch_school", "note": "I said homeworry 6 times at school today." },
+    { "dateOffset": 0, "tallyType": "heard", "count": 1, "context": "ch_school", "note": "One classmate said it one time." }
+  ],
+  "week": {
+    "tickCount": 1,
+    "tickPrefer": ["read your word aloud", "five times fast", "three sentences"],
+    "own": { "title": "Ask my sister to say homeworry one time", "dueOffset": 1 }
+  },
+  "report": {
+    "profile": "My word is homeworry. It is a noun. It means the worry feeling when your homework is not finish, for example on Sunday night before school. I made it by blending two words: homework and worry. I took the first part of homework and put the word worry after it, so it is easy to remember and easy to guess. In my zero-baseline check on 12 November I searched Google, TikTok, Instagram, X, YouTube and Urban Dictionary. I did not find my meaning in any place. Google showed only the two words home and worry in news about house prices, so that is another meaning, not my meaning. The purpose of my word is to help students say a very common feeling in one short word, and to feel that we are in the same group. My target groups are my school friends and my family. My friends in M4 have a lot of homework every week, and my little sister in primary school has homework too. I think they really need this word, because everybody feels homeworry but we do not have a word for it in English or in Thai.",
+    "fudge": "My FUDGE total is 7 out of 10, so the app says my word is likely to last. F is 2 because students have homework every day, so they can say homeworry a lot. U is 1 because it sounds like English, but some people may think it is a spelling mistake for homework. D is 1 because students can use it, but adults at work do not have homework. G is 1 because maybe people can say homeworried, but I am not sure it sounds good. E is 2 because homework will never finish in Thailand, so the word can stay for a long time. My research question is: Will M4 students know my word homeworry in the Wave 2 survey? My first hypothesis is that at least 10% of students will recognise homeworry in Wave 2. I will test it with the recognition number in the survey. My second hypothesis is that more students will understand the meaning of homeworry in Wave 2 than in Wave 1. I will test it with the comprehension number, because comprehension shows if people really know the meaning and not only the sound.",
+    "wave1": "Wave 1 is not ready yet. T.Chris will do the survey on 23 and 24 November, so I do not have any numbers now. I will write the real numbers here after he publishes them. In Wave 1 I expect almost zero recognition for homeworry, because I only started to say it this week to a few friends. This is my baseline, the starting point. The control words aura farming and crash out will show how well students know real slang, and the foil words drovish and trelky will show how many students say yes to a word that is not real. Then I can find my corrected recognition. Wave 1 cannot tell me if my word is spreading. It only tells me where I start, so I can compare it with Wave 2 in December.",
+    "plan": "I will start with my school friends in M4, because we sit together at lunch and we talk about homework every day. My bridge to another group is my little sister, because she can take the word to her primary school. My first action is to say homeworry at lunch on Monday 23 November. On 29 November I will teach my sister the word at home. On 2 December I will use the word in English club before the test, because the club students are nervous too. I will record my evidence in my Lab Book, and I will save tallies and sightings in WordIdol every week. I do in person only, I do not use social media now. For safety I follow the six rules. I will not write real names, I will not talk to strangers about my word, and I will not pay anybody or ask for favours. If something bad happens, I will stop and tell T.Chris on the same day.",
+    "ai": "I used Google Translate for two words in section 1. I wrote all the sentences myself."
+  },
+  "problem": { "category": "other", "note": "Test flag from the walkthrough – please ignore" },
+  "review": {
+    "wentWell": "I said my word to my friends and one classmate used it.",
+    "toChange": "Next week I will say it in the classroom, not in the noisy canteen."
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "id": "B2",
+  "level": "B2",
+  "studentId": "g2",
+  "label": "Guest#2",
+  "about": "Simulated M4 student at CEFR B2. Fluent and informal, a few slips (prepositions, articles, the odd tense). In person first, Instagram planned for after the L9 briefing; standard time budget. Written by Claude for the W6 walkthrough; not a real student.",
+  "timing": {
+    "readWpm": 150,
+    "readShare": 0.55,
+    "rereadShare": 0.15,
+    "orientSec": 15,
+    "typeCpm": 95,
+    "thinkPerField": 25,
+    "secPerChoice": 5,
+    "uploadSec": 75,
+    "zbSearchSec": 720,
+    "reportPlanSec": 300,
+    "copySec": 20,
+    "heavyScreenWords": 500
+  },
+  "slips": ["upload.crop"],
+  "probes": [
+    {"term": "corrected recognition", "re": "corrected recognition", "note": "\"Corrected recognition\" is offered as a metric for a hypothesis, but the hypotheses screen does not say how it is worked out (recognition minus the foil rate).", "screen": "audition/hyp"},
+    {"term": "Evidence Level", "re": "Evidence Level", "note": "Evidence Level 0 \"Self-report\" vs Level 4 \"Earned inside your network\": the difference between a friend telling her and hearing it herself is only clear after opening the levels sheet.", "screen": "log/sighting"},
+    {"term": "tally-asked", "screen": "log/tally", "re": "Someone asked what it means", "note": "Tally type \"Someone asked what it means\" (id \"asked\") versus the sighting question \"Did you ask them to use it?\" (\"I asked them to\"): \"asked\" points in opposite directions on two Log forms, so it is easy to count her own questions here."}
+  ],
+  "first": {
+    "word": "phonesty",
+    "meaning": "Being honest about how long you really spent on your phone, for example when friends compare screen time.",
+    "example1": "Okay, phonesty time: I was on TikTok for three hours last night.",
+    "pos": "noun",
+    "posAlso": []
+  },
+  "card": {
+    "usageRules": "Uncountable noun, usually in fixed chunks: 'phonesty time', 'full phonesty', 'a phonesty check'. Friends my age use it in casual talk or chats when we confess screen time. Don't use it with teachers or in formal writing.",
+    "forms": { "plural": "" },
+    "pronunciation": "FOHN-es-tee, rhymes with honesty",
+    "formation": "blending",
+    "sourceWords": "phone + honesty (phone replaces the 'hon' of honesty)",
+    "example2": "We did a phonesty check at lunch and nobody was under four hours.",
+    "example3": "Full phonesty, I checked Instagram during the whole revision session.",
+    "doNotUse": "When someone is really worried about phone addiction it is not a joke, so don't use it to laugh at them.",
+    "purpose": "It turns a slightly embarrassing confession into a game, so my friend group can talk about screen time without feeling judged."
+  },
+  "zb": {
+    "checkedAt": "2026-11-12",
+    "places": [
+      { "id": "zb_google", "result": "other_meaning", "note": "A few blog puns about phone shops being honest, not my meaning." },
+      { "id": "zb_tiktok", "result": "none", "note": "" },
+      { "id": "zb_instagram", "result": "other_meaning", "note": "One shop account uses #phonesty for phone repairs." },
+      { "id": "zb_x", "result": "none", "note": "" },
+      { "id": "zb_youtube", "result": "none", "note": "" },
+      { "id": "zb_urban", "result": "none", "note": "No entry." }
+    ],
+    "statement": "No one uses phonesty with my meaning. Google and one Instagram shop use it as a pun about honest phone repairs, which is a different meaning.",
+    "shot": false
+  },
+  "fudge": {
+    "F": [2, "Screen time comes up almost every day, especially after weekends."],
+    "U": [2, "It sounds like 'honesty', so people don't stop and stare at it."],
+    "D": [1, "Teens and parents could use it, but mostly my age group for now."],
+    "G": [1, "'Phonest' as an adjective might work, but it sounds a bit forced."],
+    "E": [2, "Phones are not going anywhere, so the concept will still matter."]
+  },
+  "hyp": {
+    "researchQuestion": "To what extent will students outside my friend group recognise phonesty by Wave 2?",
+    "hypotheses": [
+      { "text": "Corrected recognition of phonesty will be at least 10 percentage points by Wave 2.", "metric": "corrected", "target": "10 points by Wave 2" },
+      { "text": "Most sightings by Wave 2 will be earned (unprompted) rather than owned.", "metric": "level", "target": "more earned than owned" },
+      { "text": "Comprehension will stay higher than recognition, because the word explains itself.", "metric": "comprehension", "target": "comp > rec in Wave 2" }
+    ]
+  },
+  "spec": {
+    "R1": ["not_yet", "Three syllables, but it flows like honesty."],
+    "R2": ["pass", "Three classmates read it right without help."],
+    "R3": ["pass", "Blend: phone + honesty."],
+    "R4": ["pass", "We need a word for confessing screen time."],
+    "R5": ["pass", "Two friends guessed it from 'phonesty time'."],
+    "R6": ["not_yet", "Noun only so far; 'phonest' is a maybe."],
+    "R7": ["pass", "Phones, school, family arguments about screen time."],
+    "R8": ["not_yet", "Possible: phonest, phonesty check."],
+    "R9": ["pass", "Only a shop pun with another meaning."],
+    "R10": ["pass", "No insult, no double meaning in Thai."]
+  },
+  "choices": {
+    "targetGroups": ["tg_school", "tg_online", "tg_5_16"],
+    "ideas": ["id_speak", "id_memes", "id_instagram"],
+    "platforms": ["pf_instagram", "pf_chats"],
+    "is16": "false",
+    "route": "play",
+    "timeBudget": "standard",
+    "who": "My lunch group (five girls in M4) first, then my online friends from my dance class.",
+    "why": "We compare screen time all the time and there's no fun word for admitting the real number.",
+    "what": "They'll hear 'phonesty time' at lunch and later see it in a story where I post my own screen time.",
+    "spark": "Monday screen-time notifications: everyone groans at the weekly report, which is the perfect moment.",
+    "projectAccount": "phonesty.m4"
+  },
+  "planActions": [
+    { "where": "ch_school", "ideaId": "id_speak", "what": "Start a phonesty check at lunch with my friend group", "why": "They already moan about screen time every Monday.", "theoryTag": "th-stepps-social", "whenDate": "2026-11-23", "evidence": "journal", "targetGroup": "tg_school" },
+    { "where": "ch_school", "ideaId": "id_memes", "what": "Draw a phonesty meme on the whiteboard before homeroom", "why": "A picture is public and people copy funny captions.", "theoryTag": "th-stepps-public", "whenDate": "2026-11-25", "evidence": "sighting", "targetGroup": "tg_school" },
+    { "where": "ch_instagram", "ideaId": "id_instagram", "what": "Post an Instagram story asking friends for their phonesty number", "why": "My dance friends are mostly reachable online.", "theoryTag": "th-stepps-social", "whenDate": "2026-11-28", "evidence": "screenshot", "targetGroup": "tg_online", "online": true },
+    { "where": "ch_home", "ideaId": "id_speak", "what": "Use phonesty with my cousins at the family dinner", "why": "My cousins are 12 and 14, a bridge to younger kids.", "theoryTag": "th-weakties", "whenDate": "2026-12-05", "evidence": "tally", "targetGroup": "tg_5_16" }
+  ],
+  "actions": [
+    { "dateOffset": -1, "planIndex": null, "channelId": "ch_school", "ideaId": "id_speak", "what": "Launched phonesty at lunch: I said 'okay, phonesty time' and everyone said their real screen time.", "outcome": "as_planned", "outcomeReason": "", "audience": "p2_5", "reaction": "Two friends laughed and one said 'fine, full phonesty: six hours'.", "learned": "The word spreads faster as a little game: people want to join in when it comes with a challenge." },
+    { "dateOffset": 0, "planIndex": 2, "channelId": "ch_instagram", "ideaId": "id_instagram", "what": "Wanted to post an Instagram story asking for everyone's phonesty number.", "outcome": "not_done", "outcomeReason": "Online actions are locked until the L9 safety briefing, so I kept it for next week.", "audience": "", "reaction": "", "learned": "I need a second in-person idea for this week instead of waiting for online." },
+    { "dateOffset": 0, "planIndex": 1, "channelId": "ch_school", "ideaId": "id_memes", "what": "Made a phonesty meme and showed it to my group at break.", "outcome": "changed", "outcomeReason": "The whiteboard was in use, so I drew it on paper and showed it at break instead.", "audience": "p6_20", "reaction": "A girl from the next table asked to take a photo of it.", "learned": "Paper is easier than the whiteboard, and people outside my group noticed it." }
+  ],
+  "journal": [
+    { "kind": "reflection", "dateOffset": 0, "text": "Launch week. I introduced phonesty at lunch as a mini game: everyone had to say their real screen time. It worked better than I expected, because the word gave people permission to admit a high number without being judged. One friend already used it on her own the next day. The meme on paper got attention from another table, which is my first sign of the word leaving my group. Next week I want a second in-person idea, since online is still locked." },
+    { "kind": "zero_result", "dateOffset": 0, "text": "Nothing happened outside my friend group this week. I listened for phonesty in my other classes and at my tutoring centre and heard nothing, and nobody asked me about it. That's honest data: the word has only been out for three days and only inside one group of five." }
+  ],
+  "sightings": [
+    { "dateOffset": 0, "channelId": "ch_school", "relation": "classmate", "quote": "Phonesty: I was on my phone till 2 a.m.", "context": "Morning before homeroom, a classmate talking about her weekend.", "prompted": "unasked", "marked": "natural", "topic": "phones", "posUsed": "noun", "derivedForm": "", "level": 4, "verifiable": false, "openLevels": true },
+    { "dateOffset": 0, "channelId": "ch_school", "relation": "me", "quote": "Phonesty check, everyone!", "context": "I started the lunch game myself.", "prompted": "asked", "marked": "marked", "topic": "friends", "posUsed": "noun", "derivedForm": "", "level": 1, "verifiable": false, "shot": true, "shotCaption": "My phonesty meme on paper" }
+  ],
+  "tallies": [
+    { "dateOffset": 0, "tallyType": "said", "count": 8, "context": "ch_school", "note": "Said phonesty 8 times over lunch and break." },
+    { "dateOffset": 0, "tallyType": "asked", "count": 2, "context": "ch_school", "note": "Two girls from the next table asked me what phonesty means." }
+  ],
+  "week": {
+    "tickCount": 2,
+    "tickPrefer": ["read your word aloud", "three sentences", "two new forms"],
+    "own": { "title": "Make a second phonesty meme for the class noticeboard", "dueOffset": 2 }
+  },
+  "report": {
+    "profile": "My term is phonesty, an uncountable noun that means being honest about how long you have really spent on your phone. It is a blend: the word phone replaces the first part of honesty, so the new word still sounds like honesty and the meaning is easy to guess. It usually appears in short chunks such as phonesty time, full phonesty and a phonesty check. My zero-baseline check on 12 November covered Google, TikTok, Instagram, X, YouTube and Urban Dictionary. Nobody used phonesty with my meaning. Google showed a few blog puns about honest phone shops, and one Instagram repair shop uses the hashtag #phonesty, but both are a different meaning, so my word was new when I launched it. The purpose of phonesty is social rather than practical: it turns an embarrassing confession into a small game, so my friends can talk about screen time without feeling judged. My target groups are school friends, my online friends from dance class and younger teenagers aged 5 to 16, because they all receive weekly screen-time reports and complain about them. The weekly report is a ready-made trigger for the word.",
+    "fudge": "My FUDGE prediction is 8 out of 10, which falls in the likely-to-last band. Frequency gets 2, because screen time comes up almost every day, especially after weekends. Unobtrusiveness gets 2, because phonesty sounds like honesty and people do not stop and stare at it. Diversity of users gets only 1: parents could use it, but for now it belongs to my age group. Generation gets 1, because phonest as an adjective might work, but it sounds a bit forced. Endurance gets 2, since phones are not going anywhere and the concept will still matter. My research question is: to what extent will students outside my friend group recognise phonesty by Wave 2? I have three hypotheses. First, corrected recognition of phonesty will be at least 10 percentage points by Wave 2; I will test this with the survey figure after the foil rate is taken away. Second, most of my sightings by Wave 2 will be earned rather than owned, which I will check with the Evidence Levels in my log. Third, comprehension will stay higher than recognition, because the word explains itself once people hear it in a sentence.",
+    "wave1": "Wave 1 has not been published yet: T.Chris runs the survey on 23 and 24 November, so this section describes my plan for reading it rather than the results. I expect phonesty to start very close to zero, because I launched it only a few days before the survey and only inside one group of five. That is exactly what a baseline should show. To read my result fairly I will look at three things. First, my raw recognition. Second, the two control words, aura farming and crash out, which show how well the classes know slang that already exists. Third, the foils drovish and trelky: they are not real words, so anyone who says they know them shows how much guessing there is. My corrected recognition is my recognition minus that foil rate. Wave 1 cannot tell me anything about spread, because there is nothing to compare it with yet.",
+    "plan": "I will start with my lunch group of five, because they already moan about screen time every Monday and that gives the word a natural trigger. My bridges to other groups are the girls at the next table, who noticed my meme, and my two younger cousins, who can carry the word to a different age group. My plan table has four actions: a phonesty check at lunch on 23 November, a meme on the whiteboard on 25 November, an Instagram story on 28 November and a family dinner with my cousins on 5 December. The Instagram story is planned but locked until online actions open after the L9 safety briefing, so I will only post it once WordIdol unlocks it. I will record evidence through Lab Book entries, sightings, tallies and screenshots. For safety I follow all six rules: my project account will be private, I will not message strangers, I will block and report any negative comment, and I will never pay or ask for favours to promote the word. If anything feels wrong, I will stop and tell T.Chris straight away.",
+    "ai": "I did not use AI tools for this report. I used the WordIdol facts boxes and wrote every sentence myself."
+  },
+  "problem": null,
+  "review": {
+    "wentWell": "The lunch game worked and one friend used phonesty on her own.",
+    "toChange": "I need a second in-person idea while online is still locked."
+  }
+}

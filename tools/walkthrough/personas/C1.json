@@ -1,0 +1,139 @@
+{
+  "id": "C1",
+  "level": "C1",
+  "studentId": "g3",
+  "label": "Guest#3",
+  "about": "Simulated M4 student at CEFR C1. Precise, hedged, analytical. In person first, TikTok planned for after the L9 briefing; stretch time budget. Attaches a zero-baseline screenshot as well as a log screenshot. Written by Claude for the W6 walkthrough; not a real student.",
+  "timing": {
+    "readWpm": 220,
+    "readShare": 0.45,
+    "rereadShare": 0.1,
+    "orientSec": 10,
+    "typeCpm": 150,
+    "thinkPerField": 18,
+    "secPerChoice": 4,
+    "uploadSec": 60,
+    "zbSearchSec": 600,
+    "reportPlanSec": 240,
+    "copySec": 15,
+    "heavyScreenWords": 900
+  },
+  "slips": [],
+  "probes": [
+    {"term": "level-target", "screen": "audition/hyp", "re": "Evidence Level reached", "note": "The metric \"Evidence Level reached\" needs a level as its target, but the Target hint only gives a percentage example (\"10% by Wave 2\"); there is no example such as \"Level 5 by 15 Dec\"."}
+  ],
+  "first": {
+    "word": "brainstash",
+    "meaning": "To save a sudden idea in your notes app straight away, before you forget it.",
+    "example1": "Wait, let me brainstash that idea before the bell rings.",
+    "pos": "verb",
+    "posAlso": ["noun"]
+  },
+  "card": {
+    "usageRules": "Regular verb (brainstash, brainstashes, brainstashed, brainstashing), usually transitive: 'brainstash that'. By conversion also a noun for the note itself: 'it's in my brainstash'. Neutral register among students; fine in class discussion, avoided in formal essays.",
+    "forms": { "s": "brainstashes", "ed": "brainstashed", "ing": "brainstashing" },
+    "pronunciation": "BRAIN-stash, stress on the first syllable",
+    "formation": "compounding",
+    "sourceWords": "brain + stash (to hide something away for later); noun use by conversion",
+    "example2": "I brainstashed three essay hooks on the bus this morning.",
+    "example3": "Before the debate we each had to brainstash one counter-argument.",
+    "doNotUse": "Not for copying someone else's idea without credit: that is not brainstashing, it is taking.",
+    "purpose": "It names a habit that students already have but cannot label, and it makes capturing ideas sound deliberate rather than forgetful."
+  },
+  "zb": {
+    "checkedAt": "2026-11-12",
+    "places": [
+      { "id": "zb_google", "result": "none", "note": "No exact matches; results split it into 'brain stash'." },
+      { "id": "zb_tiktok", "result": "none", "note": "" },
+      { "id": "zb_instagram", "result": "none", "note": "" },
+      { "id": "zb_x", "result": "other_meaning", "note": "Two old posts use 'brain stash' for snacks kept for studying." },
+      { "id": "zb_youtube", "result": "none", "note": "" },
+      { "id": "zb_urban", "result": "none", "note": "No entry under either spelling." }
+    ],
+    "statement": "No source uses brainstash with my meaning. X has two posts using 'brain stash' (two words) for study snacks, a different sense, so the term is new as coined.",
+    "shot": true,
+    "shotCaption": "BRAINSTASH_google_20261112"
+  },
+  "fudge": {
+    "F": [1, "Ideas arrive several times a week, but not in every conversation."],
+    "U": [2, "Both parts are ordinary English words, so it passes as natural."],
+    "D": [2, "Anyone who takes notes could use it, from students to office workers."],
+    "G": [2, "It already inflects as a verb and converts into a noun."],
+    "E": [1, "Note-taking will last, though the 'app' framing could date the word."]
+  },
+  "hyp": {
+    "researchQuestion": "To what extent does using brainstash in an academic setting (debate and study groups) lead to unprompted use outside those groups by Wave 3?",
+    "hypotheses": [
+      { "text": "Corrected recognition will rise from Wave 1 to Wave 2 by at least 8 percentage points.", "metric": "corrected", "target": "+8 points W1 to W2" },
+      { "text": "Comprehension will exceed recognition in Wave 2, because the compound is transparent.", "metric": "comprehension", "target": "comp > rec in Wave 2" },
+      { "text": "At least one sighting at Level 5 (outside my network) will be logged before the Summit.", "metric": "level", "target": "Level 5 by 15 Dec" }
+    ]
+  },
+  "spec": {
+    "R1": ["pass", "Two syllables; easy to repeat quickly."],
+    "R2": ["pass", "Both parts have one obvious pronunciation."],
+    "R3": ["pass", "Compound, plus conversion to a noun."],
+    "R4": ["pass", "Names the moment of capturing an idea."],
+    "R5": ["pass", "Three of three classmates guessed it from one sentence."],
+    "R6": ["pass", "Verb, noun ('my brainstash') and adjective ('brainstash folder')."],
+    "R7": ["pass", "Essays, debate, gift ideas, travel plans."],
+    "R8": ["pass", "brainstasher, brainstashing, brainstash folder."],
+    "R9": ["pass", "Exact spelling returns nothing relevant."],
+    "R10": ["pass", "Neutral meaning, no Thai double meaning."]
+  },
+  "choices": {
+    "targetGroups": ["tg_school", "tg_5_16", "tg_online", "tg_family"],
+    "ideas": ["id_speak", "id_clubs", "id_tiktok"],
+    "platforms": ["pf_tiktok", "pf_chats"],
+    "is16": "true",
+    "route": "utility",
+    "timeBudget": "stretch",
+    "who": "Debate club and my revision group first (about twelve people), then younger students through club events and my family at home.",
+    "why": "They generate ideas constantly in discussion and lose half of them; a word for capturing ideas makes the habit visible and shareable.",
+    "what": "They will hear 'brainstash that' whenever someone makes a good point, and later see a short TikTok demonstrating it.",
+    "spark": "Debate prep, when a strong counter-argument comes up and someone says 'wait, write that down'.",
+    "projectAccount": "brainstash.lab"
+  },
+  "planActions": [
+    { "where": "ch_school", "ideaId": "id_clubs", "what": "Use brainstash during debate club prep whenever someone makes a strong point", "why": "Debaters constantly lose good points; the word gives the moment a name.", "theoryTag": "th-stepps-triggers", "whenDate": "2026-11-23", "evidence": "journal", "targetGroup": "tg_school" },
+    { "where": "ch_school", "ideaId": "id_speak", "what": "Ask my revision group to brainstash quiz questions in a shared notes page", "why": "A practical routine makes the word useful, not just funny.", "theoryTag": "th-stepps-practical", "whenDate": "2026-11-25", "evidence": "sighting", "targetGroup": "tg_school" },
+    { "where": "ch_home", "ideaId": "id_speak", "what": "Introduce brainstash to my parents as a reminder habit at dinner", "why": "A dense home network tests whether the word works outside school.", "theoryTag": "th-dense", "whenDate": "2026-11-29", "evidence": "tally", "targetGroup": "tg_family" },
+    { "where": "ch_tiktok", "ideaId": "id_tiktok", "what": "Post a 20-second TikTok showing how I brainstash ideas on the bus", "why": "Short video is how younger students meet new words.", "theoryTag": "th-stepps-public", "whenDate": "2026-12-01", "evidence": "screenshot", "targetGroup": "tg_online", "online": true },
+    { "where": "ch_school", "ideaId": "id_clubs", "what": "Run a two-minute brainstash challenge at the start of English club", "why": "Seeing several people use it at once creates social proof.", "theoryTag": "th-socialproof", "whenDate": "2026-12-03", "evidence": "sighting", "targetGroup": "tg_5_16" }
+  ],
+  "actions": [
+    { "dateOffset": -1, "planIndex": null, "channelId": "ch_school", "ideaId": "id_clubs", "what": "Introduced brainstash at debate club: I said 'brainstash that' each time someone made a strong point and wrote it in my notes.", "outcome": "as_planned", "outcomeReason": "", "audience": "p6_20", "reaction": "By the end, a friend in another class said 'brainstash it' without me prompting her.", "learned": "Attaching the word to a recurring, slightly stressful moment matters more than explaining it; nobody asked what it meant." },
+    { "dateOffset": 0, "planIndex": 2, "channelId": "ch_home", "ideaId": "id_speak", "what": "Explained brainstash to my parents while planning a family trip.", "outcome": "changed", "outcomeReason": "It came up naturally during trip planning, a week earlier than the dinner I had planned.", "audience": "p2_5", "reaction": "My father found it funny but used 'write it down' instead.", "learned": "Adults accept the idea but default to the phrase they already have, so the gap is smaller for them." },
+    { "dateOffset": 0, "planIndex": 3, "channelId": "ch_tiktok", "ideaId": "id_tiktok", "what": "Drafted a short TikTok showing how I brainstash on the bus, but did not post it.", "outcome": "not_done", "outcomeReason": "Online actions stay locked until the L9 safety briefing on 26 November.", "audience": "", "reaction": "", "learned": "The draft is ready, so the online action can start the day it unlocks." }
+  ],
+  "journal": [
+    { "kind": "reflection", "dateOffset": 0, "text": "First week of brainstash. The debate club launch suggests that the word spreads best when it is tied to a recurring trigger: every time someone made a strong point, I said 'brainstash that', and within forty minutes a friend from another class repeated it unprompted. That is one earned sighting, which is promising but far too little to generalise from. At home the result was weaker: my parents understood the word immediately but kept using 'write it down', which suggests the lexical gap is smaller for adults. Next week I want to test whether the word survives without me in the room, by watching the revision group's shared notes page." },
+    { "kind": "failure_analysis", "dateOffset": 0, "text": "The family action did not produce adoption. Both parents understood brainstash at once, so comprehension was not the issue; the problem was competition from an existing phrase, 'write it down', which already fills the slot for them. In STEPPS terms there was no social currency for adults in using a teenager's word. I will drop the family as a target for adoption and keep them only as a comprehension check." }
+  ],
+  "sightings": [
+    { "dateOffset": -1, "channelId": "ch_school", "relation": "friend_class", "quote": "Hang on, let me brainstash that.", "context": "End of debate club prep, after a teammate's counter-argument.", "prompted": "unasked", "marked": "natural", "topic": "school", "posUsed": "verb", "derivedForm": "", "level": 4, "verifiable": false },
+    { "dateOffset": 0, "channelId": "ch_school", "relation": "me", "quote": "I brainstashed three essay hooks on the bus.", "context": "Telling my revision group how I prepared.", "prompted": "asked", "marked": "natural", "topic": "school", "posUsed": "verb", "derivedForm": "brainstashed", "level": 1, "verifiable": true, "shot": true, "shotCaption": "My notes page with the word" },
+    { "dateOffset": 0, "channelId": "ch_home", "relation": "cousin", "quote": "My cousin says she has been brainstashing for her exams.", "context": "She told me on the phone; I did not see it myself.", "prompted": "unsure", "marked": "unsure", "topic": "exams", "posUsed": "verb", "derivedForm": "brainstashing", "level": 0, "verifiable": false, "openLevels": true }
+  ],
+  "tallies": [
+    { "dateOffset": 0, "tallyType": "said", "count": 11, "context": "ch_school", "note": "Said brainstash 11 times across debate club and revision." },
+    { "dateOffset": -1, "tallyType": "heard", "count": 3, "context": "ch_school", "note": "Heard it 3 times from others, twice from the same friend." }
+  ],
+  "week": {
+    "tickCount": 2,
+    "tickPrefer": ["two new forms", "three sentences", "read your word aloud"],
+    "own": { "title": "Check the revision group's notes page for unprompted brainstash use", "dueOffset": 1 }
+  },
+  "report": {
+    "profile": "My term is brainstash, a verb meaning to save a sudden idea in your notes app immediately, before you forget it. It is a compound of brain and stash, where stash means to hide something away for later, and by conversion it also works as a noun for the note itself, as in 'it's in my brainstash'. It inflects regularly as brainstashes, brainstashed and brainstashing, which matters for its generation potential. My zero-baseline search on 12 November covered Google, TikTok, Instagram, X, YouTube and Urban Dictionary. None of them used the word with my meaning. The only near match was on X, where two old posts use 'brain stash', written as two words, for snacks kept for studying; this is a different sense, so the coinage was new when I launched it. The purpose of brainstash is practical: it names a habit students already have but cannot label, and it reframes capturing ideas as deliberate rather than forgetful. My target community is debate club and my revision group, about twelve people, with younger students and my family as secondary groups. Discussion-heavy groups produce ideas constantly and lose many of them, so they have a genuine need for the word and a recurring trigger for using it.",
+    "fudge": "My FUDGE prediction totals 8 out of 10, which places brainstash in the likely-to-last band, although I treat this as a prediction rather than evidence. Frequency scores only 1: ideas arrive several times a week, but the word does not fit every conversation. Unobtrusiveness scores 2, since both parts are ordinary English words and the compound passes as natural. Diversity scores 2, because anyone who takes notes, from students to office workers, could use it. Generation scores 2: it already inflects as a verb and converts into a noun. Endurance scores 1, because note-taking will last but the 'notes app' framing could date the word. My research question asks to what extent using brainstash in academic settings, namely debate and study groups, leads to unprompted use outside those groups by Wave 3. I have three hypotheses. First, corrected recognition will rise by at least 8 percentage points from Wave 1 to Wave 2, measured as recognition minus the foil rate. Second, comprehension will exceed recognition in Wave 2, because the compound is transparent. Third, at least one Level 5 sighting, meaning unprompted use outside my network, will be logged before the Summit; this is the most demanding test and the one most likely to fail.",
+    "wave1": "Wave 1 results have not been published yet, since T.Chris runs the survey on 23 and 24 November, so this section sets out how I will interpret the data rather than reporting it. Because brainstash was launched only a few days before the survey, and only to about twelve people, I expect raw recognition close to zero; anything higher would probably reflect guessing rather than exposure. To control for that, I will compare my figure with the two foils, drovish and trelky. They are invented words, so the share of students claiming to know them gives a guessing rate, and my corrected recognition is my raw recognition minus that rate. The controls, aura farming and crash out, show what established slang looks like in the same classes. A near-zero corrected figure is not a failure here: it is the baseline that later waves will be measured against. What Wave 1 cannot show is direction or rate of spread, which needs at least Wave 2.",
+    "plan": "My campaign starts in debate club and my revision group, where ideas come up constantly and the trigger for the word recurs naturally. The likely bridge to another group is the friend from another class who already used brainstash unprompted; through her, and through an English club challenge aimed at younger students, the word can reach a second network. My plan table has five actions: debate prep on 23 November, a shared notes routine with my revision group on 25 November, a dinner conversation with my parents on 29 November, a twenty-second TikTok on 1 December and a two-minute brainstash challenge in English club on 3 December. The TikTok is planned but locked until online actions open after the L9 safety briefing on 26 November, so I have only drafted it. Evidence will come from Lab Book entries after each action, sightings with Evidence Levels, weekly tallies and screenshots of the shared notes page with names cropped out. On safety, I will follow the six rules: a separate private project account, no messages to strangers, blocking and reporting any negative comments, and no payment or favours for promotion. If anything goes wrong, I will stop, flag it in WordIdol and tell T.Chris the same day.",
+    "ai": "I used no AI tools to write this report. I used a dictionary to check the meaning of 'stash' and wrote everything myself."
+  },
+  "problem": null,
+  "review": {
+    "wentWell": "Debate club produced an unprompted use within one session, which suggests the trigger works.",
+    "toChange": "I will test whether the word survives without me in the room by watching the shared notes page."
+  }
+}
