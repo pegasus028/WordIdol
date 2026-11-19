@@ -1,0 +1,4 @@
+apps-script/Roster.gs
+node_modules/
+*.local.*
+.DS_Store

@@ -1,0 +1,111 @@
+/* WordIdol packs (W5): report helpers, wave card, chart cards, Summit / Article entry cards.
+   Builds on the tokens and components of app.css (W2): --ink, --surface, --line, .panel, .btn, .field …
+   Every colour has a fallback so the packs still read if app.css is missing. */
+
+.wp { --wp-ok: var(--ok, #12805f); --wp-line: var(--line, #ead7e3); --wp-ink2: var(--ink-2, #4a3f5e); --wp-ink3: var(--ink-3, #6e6382);
+  --wp-surface: var(--surface, #ffffff); --wp-surface2: var(--surface-2, #fbeef5); --wp-pop: var(--pop, #e5337a); --wp-gold: var(--gold, #f2b632); }
+.wp h2 { font-size: 1.25rem; }
+.wp .small { font-size: .875rem; }
+
+/* facts box: read-only data from WordIdol */
+.wp-facts, .wp-frames, .wp-numbers { border-radius: var(--r-md, 12px); margin: .6rem 0 .9rem; }
+.wp-facts { background: var(--wp-surface2); border: 1px dashed var(--wp-line); }
+.wp-facts > summary, .wp-frames > summary, .wp-numbers > summary {
+  cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; gap: .4rem; padding: .4rem .8rem; list-style: none;
+}
+.wp-facts > summary::-webkit-details-marker, .wp-frames > summary::-webkit-details-marker, .wp-numbers > summary::-webkit-details-marker { display: none; }
+.wp-facts > summary::before, .wp-frames > summary::before, .wp-numbers > summary::before {
+  content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg); transition: transform .15s; margin-right: .2rem; flex: none;
+}
+.wp-facts[open] > summary::before, .wp-frames[open] > summary::before, .wp-numbers[open] > summary::before { transform: rotate(45deg); }
+.wp-facts-body { padding: 0 .8rem .8rem; }
+.wp-fact { margin: 0 0 .9rem; }
+.wp-fact h4 { margin: .2rem 0 .35rem; font-size: .95rem; color: var(--wp-ink2); }
+.wp-dl { margin: 0; display: grid; gap: .25rem; }
+.wp-dl > div { display: grid; grid-template-columns: minmax(7.5rem, 34%) 1fr; gap: .6rem; font-size: .92rem; padding: .15rem 0; border-bottom: 1px solid color-mix(in srgb, var(--wp-line) 60%, transparent); }
+.wp-dl > div:last-child { border-bottom: 0; }
+.wp-dl dt { color: var(--wp-ink3); }
+.wp-dl dd { margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
+@media (max-width: 420px) { .wp-dl > div { grid-template-columns: 1fr; gap: 0; } .wp-dl dt { font-size: .8rem; } }
+.wp-ul { margin: .3rem 0 .5rem; padding-left: 1.2rem; }
+.wp-ul li { margin: .2rem 0; overflow-wrap: anywhere; }
+.wp-ul.wp-plain { list-style: none; padding-left: 0; }
+/* wide fact tables (6+ columns) become stacked cards on phones */
+@media (max-width: 600px) {
+  .wp-stackwrap { border: 0; background: transparent; overflow: visible; }
+  table.t.wp-stack, table.t.wp-stack tbody, table.t.wp-stack tr, table.t.wp-stack td { display: block; width: 100%; }
+  table.t.wp-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.t.wp-stack tr { background: var(--wp-surface); border: 1px solid var(--wp-line); border-radius: var(--r-md, 12px); margin: 0 0 .5rem; padding: .3rem .2rem; }
+  table.t.wp-stack td { border: 0; padding: .2rem .5rem; text-align: left; display: grid; grid-template-columns: 6rem 1fr; gap: .5rem; }
+  table.t.wp-stack td::before { content: attr(data-label); color: var(--wp-ink3); font-size: .8rem; }
+  table.t.wp-stack td:empty { display: none; }
+}
+.wp-empty { color: var(--wp-ink3); font-style: italic; margin: .2rem 0; }
+.wp-fnote { font-size: .875rem; color: var(--wp-ink2); margin: .35rem 0; }
+.wp-tw { margin: .3rem 0; }
+.wp-tw table.t { font-size: .85rem; }
+.wp-frames { background: transparent; border: 1px solid var(--wp-line); }
+.wp-frames ul { margin: 0; padding: 0 .9rem .7rem 2rem; }
+.wp-frames li { margin: .25rem 0; }
+.wp-prompt { margin-top: -.2rem; }
+
+/* word meter */
+.wp-meter-top { display: flex; align-items: baseline; gap: .3rem; flex-wrap: wrap; }
+.wp-meter-top b { font-family: var(--f-display, inherit); font-size: 1.6rem; line-height: 1; }
+.wp-bar { position: relative; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--wp-line) 80%, transparent); margin: .55rem 0 .5rem; overflow: visible; }
+.wp-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--wp-ink3); transition: width .2s; }
+.wp-bar i.in { background: var(--wp-ok); }
+.wp-bar i.over { background: var(--bad, #b4232f); }
+.wp-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--wp-ink2); border-radius: 1px; }
+.wp-ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem .8rem; font-size: .82rem; color: var(--wp-ink2); }
+.wp-ticks li.ok { color: var(--wp-ok); font-weight: 600; }
+.count.wp-ok { color: var(--wp-ok); }
+/* one fixed-height line, so a changing save message never moves the page under the finger */
+.wp-foot { flex-wrap: nowrap; gap: .5rem; }
+.wp-foottotal { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; font-size: .9rem; }
+.wp-foot .savestate { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; min-height: 0; }
+.wp-foot .btn { flex: none; }
+.wp-actions .btn { flex: 1 1 14rem; }
+.wp-copybox { margin-top: 1rem; }
+.wp-status { margin-top: .35rem; }
+
+/* wave card */
+.wp-wave-h { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.wp-wave-h h2 { margin: 0; flex: 1; }
+.wp-hero { display: grid; gap: .15rem; margin: .8rem 0; padding: .8rem .9rem; border-radius: var(--r-md, 12px); background: var(--wp-surface2); border-left: 4px solid var(--wp-pop); }
+.wp-hero-k { color: var(--wp-ink2); font-size: .92rem; }
+.wp-hero-v { font-size: 3rem; font-weight: 700; line-height: 1.05; letter-spacing: -.02em; }
+.wp-hero-f { font-size: .9rem; color: var(--wp-ink2); }
+.wp-nb { white-space: nowrap; }
+.wp-hero-w { font-size: .875rem; font-weight: 600; color: var(--warn, #9a5b00); }
+.wp-wtable { font-size: .88rem; }
+table.t.wp-wtable th, table.t.wp-wtable td { padding: .5rem .35rem; }
+table.t.wp-wtable th:first-child, table.t.wp-wtable td:first-child { padding-left: .6rem; }
+table.t.wp-wtable th:last-child, table.t.wp-wtable td:last-child { padding-right: .6rem; }
+.wp-wtable td:first-child { overflow-wrap: break-word; min-width: 5.2rem; }
+.wp-tk { display: block; white-space: nowrap; overflow-wrap: normal; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--wp-ink3); font-weight: 700; }
+table.t tr.me .wp-tk { color: var(--pop-ink, #b8185a); }
+.wp-noteform { margin-top: 1rem; border-top: 1px solid var(--wp-line); padding-top: 1rem; }
+.wp-hyps .opts { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.wp-hyp-t { margin: .2rem 0 .4rem; }
+.wp-later h2 { font-size: 1.1rem; }
+
+/* chart card */
+.wp-chart { margin: 1rem 0 .4rem; }
+.wp-chart-h { display: grid; gap: .1rem; margin-bottom: .4rem; }
+.wp-chart-h span { font-size: .875rem; color: var(--wp-ink2); }
+.wp-chart-svg { width: 100%; min-height: 200px; border-radius: var(--r-md, 12px); overflow: hidden; border: 1px solid var(--wp-line); background: var(--wp-surface); }
+.wp-chart-svg svg { display: block; width: 100%; height: auto; }
+.wp-chart .btnrow { margin: .5rem 0 0; }
+.wp-numbers { border: 1px solid var(--wp-line); }
+.wp-numbers .tablewrap { margin: 0 .6rem .6rem; }
+
+/* opens-on card */
+.wp-opens .when { margin: .2rem 0 .6rem; }
+
+@media print {
+  .wp-foot, .wp-meter, .wp .btnrow, .wp-frames { display: none !important; }
+  .wp-facts { border: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .wp-bar i, .wp-facts > summary::before { transition: none; } }
